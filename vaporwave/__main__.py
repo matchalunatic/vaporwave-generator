@@ -5,7 +5,7 @@ from . import shapes
 GRAY = (30, 30, 30)
 SCREEN_SIZE = (1200, 900)
 TRIANGLE_SIZE = (700, int(700 / 1.622))
-TRIANGLE_SIZE_2 = (300, 400)
+TRIANGLE_SIZE_2 = (1000, 1000)
 GRID_SIZE = (800, 600)
 
 pygame.init()
@@ -32,15 +32,15 @@ tri.rect.center = screen.get_rect().center
 tri2 = shapes.InfiniteTriangle(base_size=TRIANGLE_SIZE_2, num_triangles=13,
         generators=dict(
             color_generator=shapes.default_color_generator(color=(0,128,128)),
-            zoom_generator=shapes.negator(shapes.default_zoom_generator()),
+            zoom_generator=shapes.inverter(shapes.negator(shapes.default_zoom_generator())),
             angular_speed_generator=shapes.negator(shapes.sin_wave_angular_speed_generator(mul=2, speed=1, baseline=0.5))
             )
         )
 tri2.rect.center = screen.get_rect().center
 
 grid = shapes.Grid(base_size=GRID_SIZE, generators={
-        'color_generator': shapes.default_color_generator(color=(0,0,128)),
-        'zoom_generator': shapes.sin_wave_angular_speed_generator(baseline=1, mul=3),
+        'color_generator': shapes.advanced_color_generator(r_gen=shapes.default_number_generator(255), a_gen=shapes.default_number_generator(128), change_after=10),
+        'zoom_generator': shapes.sin_wave_angular_speed_generator(baseline=5, mul=3),
     },
         spacing_x_generator=shapes.sin_wave_angular_speed_generator(baseline=15, mul=1),
         spacing_y_generator=shapes.cos_wave_angular_speed_generator(baseline=15, mul=1)

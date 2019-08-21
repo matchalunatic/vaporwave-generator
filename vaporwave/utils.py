@@ -29,6 +29,58 @@ def default_color_generator(color=(128,0,0)):
         yield color
 
 
+def default_number_generator(num=10):
+    while True:
+        yield num
+
+def tuple_minimal_total(minimum_value, a_tuple, intify=True, max_value=255):
+    total = sum(a_tuple)
+    if total >= minimum_value and not intify:
+        return a_tuple
+    difference = minimum_value - total
+    out = list(a_tuple)
+    while difference > 0:
+        d = int(difference) % len(out)
+        if out[d] < max_value:
+            out[int(difference) % len(out)] += 1
+        difference -= 1
+    return tuple(int(o) for o in out)
+
+
+
+def advanced_color_generator(change_after=None, r_gen=None, g_gen=None, b_gen=None, a_gen=None, booster=None):
+    """Generates an infinite stream of RGBA colors"""
+    if isinstance(change_after, int):
+        change_after = default_number_generator(change_after)
+    elif change_after is None:
+        change_after = default_number_generator(10)
+    if r_gen is None:
+        r_gen = sin_wave_angular_speed_generator(baseline=127, mul=127, offset=math.pi/3)
+    if g_gen is None:
+        g_gen = sin_wave_angular_speed_generator(baseline=127, mul=127, offset=2*math.pi/3)
+    if b_gen is None:
+        b_gen = sin_wave_angular_speed_generator(baseline=127, mul=127, offset=math.pi)
+    if a_gen is None:
+        a_gen = default_number_generator(255)
+    if booster is None:
+        booster = lambda val: tuple_minimal_total(80, val, intify=True)
+    c = 0
+    i = 0
+    c_a = 0
+    r, g, b, a = (0, 0, 0, 255)
+    while True:
+        if c_a == 0:
+            r = next(r_gen)
+            g = next(g_gen)
+            b = next(b_gen)
+            a = next(a_gen)
+            c_a = next(change_after)
+            col = booster((r, g, b, a))
+        yield col
+        c_a -= 1
+
+
+
 def default_angular_speed_generator(speed=2):
     while True:
         yield speed
@@ -37,17 +89,19 @@ def default_width_generator(width=2):
     while True:
         yield width
 
-def sin_wave_angular_speed_generator(mul=1, speed=1, baseline=0):
+def sin_wave_angular_speed_generator(mul=1, speed=1, baseline=0, offset=0):
+    """Offset in rad"""
     i = 0
     while True:
         i += 1
-        yield baseline + mul*math.sin(speed * i * math.pi / 180)
+        yield baseline + mul*math.sin(speed * i * math.pi / 180 + offset)
 
-def cos_wave_angular_speed_generator(mul=1, speed=1, baseline=0):
+def cos_wave_angular_speed_generator(mul=1, speed=1, baseline=0, offset=0):
+    """Offset in rad"""
     i = 0
     while True:
         i += 1
-        yield baseline + mul*math.cos(speed * i * math.pi / 180)
+        yield baseline + mul*math.cos(speed * i * math.pi / 180 + offset)
 
 def default_zoom_generator2(zoom_cycle=[0.6, 1, 3, 7, 2, 0.5,], periods=[10, 30]):
     len_zooms = len(zoom_cycle)
