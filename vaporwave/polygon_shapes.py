@@ -173,6 +173,7 @@ class InfiniteTriangle3D(InfiniteTriangle):
         if gamma_angular_speed_generator is None:
             gamma_angular_speed_generator = default_number_generator(0)
         if center3d_generator is None:
+            raise RuntimeError("nope")
             screen = pygame.display.get_surface()
             screen_size = scrw, scrh = screen.get_size()
             center3D = [scrw // 2, scrh // 2, 0]
@@ -195,7 +196,6 @@ class InfiniteTriangle3D(InfiniteTriangle):
         center3D = Vector3(*self.center3d)
         polys = []
         for points in polys_in:
-            # points = rotate_polygon_with_center(points, center, self.angle)
             points = scale_points_with_center(points, center, self.zoom)
             points = rotate3D_points_with_center(
                 points, center3D, self.alpha_angle, self.beta_angle, self.gamma_angle)

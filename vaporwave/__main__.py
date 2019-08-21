@@ -37,12 +37,12 @@ background.fill(GRAY)
 screen.blit(background, (0, 0))
 pygame.display.flip()
 
-tri = shapes.InfiniteTriangle(base_size=TRIANGLE_SIZE, num_triangles=120,
+tri = shapes.InfiniteTriangle(base_size=TRIANGLE_SIZE, num_triangles=4,
                               generators=dict(
                                   color_generator=shapes.default_color_generator(
                                       (255, 0, 10, 255)),
                                   zoom_generator=shapes.amplifier(
-                                      shapes.default_zoom_generator(), 20),
+                                      shapes.default_zoom_generator(), 0.2),
                                   angular_speed_generator=shapes.sin_wave_angular_speed_generator(
                                       mul=2, speed=1, baseline=0.5)
                               )
@@ -51,24 +51,16 @@ tri.rect.center = screen.get_rect().center
 
 tri2 = shapes.InfiniteTriangle3D(base_size=TRIANGLE_SIZE_2, num_triangles=13,
                                  generators=dict(
-                                     color_generator=shapes.default_color_generator(
-                                         color=(0, 128, 128)),
-                                     zoom_generator=shapes.inverter(
-                                         shapes.negator(shapes.default_zoom_generator())),
-                                     angular_speed_generator=shapes.negator(
-                                         shapes.sin_wave_angular_speed_generator(mul=2, speed=1, baseline=0.5))
-                                 )
-                                 )
-tri2 = shapes.InfiniteTriangle3D(base_size=TRIANGLE_SIZE_2, num_triangles=13,
-                                 generators=dict(
+                                     center3d_generator=shapes.default_number_generator(
+                                         [ TRIANGLE_SIZE_2[0]/2, TRIANGLE_SIZE_2[1]/2, 0]),
                                      color_generator=shapes.default_color_generator(
                                          color=(0, 255, 0)),
                                      zoom_generator=shapes.default_number_generator(
-                                         1),
-                                     alpha_angular_speed_generator=shapes.default_number_generator(
-                                         10),
+                                         0.3),
+                                     beta_angular_speed_generator=shapes.default_number_generator(
+                                         2),
                                      gamma_angular_speed_generator=shapes.default_number_generator(
-                                         0.2)
+                                         0)
                                  )
                                  )
 tri2.rect.center = screen.get_rect().center
@@ -98,13 +90,12 @@ grid2 = shapes.Grid3D(base_size=None, generators={
 )
 
 grid2.rect.center = MIDDLE_MIDDLE
-print(grid2)
 #grid2.rect.center = BOTTOM_MIDDLE
 clock = pygame.time.Clock()
-#allsprites = pygame.sprite.Group((tri, tri2, grid))
+allsprites = pygame.sprite.Group((tri, tri2, grid2))
 #allsprites = pygame.sprite.Group((tri2,))
 #allsprites = pygame.sprite.Group((tri, grid))
-allsprites = pygame.sprite.Group((grid2,))
+#allsprites = pygame.sprite.Group((grid2,))
 
 going = True
 

@@ -243,7 +243,7 @@ def rotate3D_point_with_center(point, center, alpha, beta, gamma):
     o = o.rotate_x(alpha)
     o = o.rotate_y(beta)
     o = o.rotate_z(gamma)
-    return o + cv
+    return o + cv 
 
 
 def rotate3D_points_with_center(points, center, alpha, beta, gamma):
