@@ -1,6 +1,6 @@
 import pygame
 from pygame.locals import *
-from pygame.math import Vector2
+from pygame.math import Vector2, Vector3
 import math
 
 
@@ -9,6 +9,8 @@ class DummyRect(object):
 
 
 _image_cache = {}
+
+
 def load_image(name):
     img = _image_cache.get(name)
     if img is not None:
@@ -23,8 +25,7 @@ def load_image(name):
     return image, image.get_rect()
 
 
-def default_color_generator(color=(128,0,0)):
-    print("Initialized generator oColorf color with color", color)
+def default_color_generator(color=(128, 0, 0)):
     while True:
         yield color
 
@@ -32,6 +33,7 @@ def default_color_generator(color=(128,0,0)):
 def default_number_generator(num=10):
     while True:
         yield num
+
 
 def tuple_minimal_total(minimum_value, a_tuple, intify=True, max_value=255):
     total = sum(a_tuple)
@@ -47,7 +49,6 @@ def tuple_minimal_total(minimum_value, a_tuple, intify=True, max_value=255):
     return tuple(int(o) for o in out)
 
 
-
 def advanced_color_generator(change_after=None, r_gen=None, g_gen=None, b_gen=None, a_gen=None, booster=None):
     """Generates an infinite stream of RGBA colors"""
     if isinstance(change_after, int):
@@ -55,15 +56,18 @@ def advanced_color_generator(change_after=None, r_gen=None, g_gen=None, b_gen=No
     elif change_after is None:
         change_after = default_number_generator(10)
     if r_gen is None:
-        r_gen = sin_wave_angular_speed_generator(baseline=127, mul=127, offset=math.pi/3)
+        r_gen = sin_wave_angular_speed_generator(
+            baseline=127, mul=127, offset=math.pi/3)
     if g_gen is None:
-        g_gen = sin_wave_angular_speed_generator(baseline=127, mul=127, offset=2*math.pi/3)
+        g_gen = sin_wave_angular_speed_generator(
+            baseline=127, mul=127, offset=2*math.pi/3)
     if b_gen is None:
-        b_gen = sin_wave_angular_speed_generator(baseline=127, mul=127, offset=math.pi)
+        b_gen = sin_wave_angular_speed_generator(
+            baseline=127, mul=127, offset=math.pi)
     if a_gen is None:
         a_gen = default_number_generator(255)
     if booster is None:
-        booster = lambda val: tuple_minimal_total(80, val, intify=True)
+        def booster(val): return tuple_minimal_total(80, val, intify=True)
     c = 0
     i = 0
     c_a = 0
@@ -80,14 +84,15 @@ def advanced_color_generator(change_after=None, r_gen=None, g_gen=None, b_gen=No
         c_a -= 1
 
 
-
 def default_angular_speed_generator(speed=2):
     while True:
         yield speed
 
+
 def default_width_generator(width=2):
     while True:
         yield width
+
 
 def sin_wave_angular_speed_generator(mul=1, speed=1, baseline=0, offset=0):
     """Offset in rad"""
@@ -96,6 +101,7 @@ def sin_wave_angular_speed_generator(mul=1, speed=1, baseline=0, offset=0):
         i += 1
         yield baseline + mul*math.sin(speed * i * math.pi / 180 + offset)
 
+
 def cos_wave_angular_speed_generator(mul=1, speed=1, baseline=0, offset=0):
     """Offset in rad"""
     i = 0
@@ -103,7 +109,8 @@ def cos_wave_angular_speed_generator(mul=1, speed=1, baseline=0, offset=0):
         i += 1
         yield baseline + mul*math.cos(speed * i * math.pi / 180 + offset)
 
-def default_zoom_generator2(zoom_cycle=[0.6, 1, 3, 7, 2, 0.5,], periods=[10, 30]):
+
+def default_zoom_generator2(zoom_cycle=[0.6, 1, 3, 7, 2, 0.5, ], periods=[10, 30]):
     len_zooms = len(zoom_cycle)
     len_periods = len(periods)
     i = 1
@@ -117,14 +124,14 @@ def default_zoom_generator2(zoom_cycle=[0.6, 1, 3, 7, 2, 0.5,], periods=[10, 30]
             d += 1
             d = d % len_periods
         yield zoom_cycle[c]
-        
+
 
 def default_spacing_generator(spacing=10):
     while True:
         yield spacing
 
 
-def default_zoom_generator(zoom_cycle=[0.6, 1, 3, 7, 2, 0.5,], periods=[10, 30]):
+def default_zoom_generator(zoom_cycle=[0.6, 1, 3, 7, 2, 0.5, ], periods=[10, 30]):
     len_zooms = len(zoom_cycle)
     len_periods = len(periods)
     i = 1
@@ -138,9 +145,9 @@ def default_zoom_generator(zoom_cycle=[0.6, 1, 3, 7, 2, 0.5,], periods=[10, 30])
             d += 1
             d = d % len_periods
         yield zoom_cycle[c]
-        
 
-def default_alpha_generator(alpha_cycle=[180, 255, 40, 62, 230, 100,], periods=[10,30,20,40,20]):
+
+def default_alpha_generator(alpha_cycle=[180, 255, 40, 62, 230, 100, ], periods=[10, 30, 20, 40, 20]):
     len_alpha = len(alpha_cycle)
     len_periods = len(periods)
     i = 1
@@ -154,7 +161,7 @@ def default_alpha_generator(alpha_cycle=[180, 255, 40, 62, 230, 100,], periods=[
             d += 1
             d = d % len_periods
         yield alpha_cycle[c]
-        
+
 
 def inverter(gen):
     while True:
@@ -164,10 +171,18 @@ def inverter(gen):
         else:
             yield 1 / v
 
+
 def negator(gen):
     while True:
         r = next(gen)
         yield -r
+
+
+def amplifier(gen, amount=1):
+    while True:
+        v = next(gen)
+        yield amount * v
+
 
 def rotate_point_with_center(point, center, angle):
     """angle is in degrees"""
@@ -194,3 +209,45 @@ def scale_polygon_with_center(points, center, zoom):
 def rotate_polygon_with_center(points, center, angle):
     center = Vector2(*center)
     return tuple((center-p).rotate(angle) + center for p in points)
+
+
+def rotate3D_point_with_center(point, center, alpha, beta, gamma):
+    """
+        rotate a set of points around three angles
+    """
+    if len(point) == 2:
+        point = Vector3(point[0], point[1], 0)
+    cv = Vector3(*center)
+    # translate coordinates to center, rotate, and re-translate
+    o = cv - point
+    # rotate around the three angles
+    o = o.rotate_x(alpha)
+    o = o.rotate_y(beta)
+    o = o.rotate_z(gamma)
+    return o + cv
+
+
+def rotate3D_points_with_center(points, center, alpha, beta, gamma):
+    """wrapper"""
+    return [rotate3D_point_with_center(p, center, alpha, beta, gamma)
+            for p in points]
+
+
+def project_v3s_on_viewport(v3s, viewport=None):
+    return [project_v3_on_viewport(v3, viewport)
+            for v3 in v3s]
+
+
+def project_v3_on_viewport(v3, viewport=None):
+    if viewport is None:
+        viewport = (
+            Vector3(1, 0, 0),
+            Vector3(0, 1, 0),
+        )
+    normal = viewport[0].cross(viewport[1]).normalize()
+
+    p3d = v3 - v3.dot(normal) * normal
+    if p3d[2] != 0:
+        print("oops")
+    o = Vector2(*p3d[0:2])
+    return o
