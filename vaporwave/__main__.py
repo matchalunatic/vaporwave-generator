@@ -1,6 +1,11 @@
 import pygame
 from pygame.locals import *
+from pygame.math import Vector2, Vector3
 from . import shapes
+import logging
+
+
+logging.basicConfig(level=logging.DEBUG)
 
 GRAY = (30, 30, 30)
 SCREEN_SIZE = (1200, 900)
@@ -37,32 +42,51 @@ background.fill(GRAY)
 screen.blit(background, (0, 0))
 pygame.display.flip()
 
-tri = shapes.InfiniteTriangle(base_size=TRIANGLE_SIZE, num_triangles=4,
-                              generators=dict(
-                                  color_generator=shapes.default_color_generator(
-                                      (255, 0, 10, 255)),
-                                  zoom_generator=shapes.amplifier(
-                                      shapes.default_zoom_generator(), 0.2),
-                                  angular_speed_generator=shapes.sin_wave_angular_speed_generator(
-                                      mul=2, speed=1, baseline=0.5)
-                              )
-                              )
+
+
+NULL_V3_GEN = shapes.default_number_generator(Vector3(0, 0, 0))
+NULL_V2_GEN = shapes.default_number_generator(Vector2(0, 0))
+
+UNIT_X_V2_GEN = shapes.default_number_generator(Vector2(1, 0))
+UNIT_Y_V2_GEN = shapes.default_number_generator(Vector2(0, 1))
+UNIT_X_V3_GEN = shapes.default_number_generator(Vector3(1, 0, 0))
+UNIT_Y_V3_GEN = shapes.default_number_generator(Vector3(0, 1, 0))
+UNIT_Z_V3_GEN = shapes.default_number_generator(Vector3(0, 0, 1))
+
+COLOR_RED = (255, 0, 0, 255)
+COLOR_GREEN = (0, 255, 0, 255)
+
+sinw = lambda: shapes.sin_wave_angular_speed_generator(mul=60, speed=1, baseline=0.5)
+
+halfer = lambda x: list(a/2 for a in x)
+
+gene = lambda x: shapes.default_number_generator(x)
+v2tov3 = lambda x: Vector3(x[0], x[1], 0)
+
+tri = shapes.InfiniteTriangle(
+        base_size=TRIANGLE_SIZE,
+        num_triangles=4,
+        generators={
+            'color_generator': shapes.default_color_generator(
+                (255, 0, 10, 255)),
+            'zoom_generator': shapes.amplifier(
+                shapes.default_zoom_generator(), 0.2),
+            'alpha_angle_generator': sinw(),
+            }
+        )
 tri.rect.center = screen.get_rect().center
 
-tri2 = shapes.InfiniteTriangle3D(base_size=TRIANGLE_SIZE_2, num_triangles=13,
-                                 generators=dict(
-                                     center3d_generator=shapes.default_number_generator(
-                                         [ TRIANGLE_SIZE_2[0]/2, TRIANGLE_SIZE_2[1]/2, 0]),
-                                     color_generator=shapes.default_color_generator(
-                                         color=(0, 255, 0)),
-                                     zoom_generator=shapes.default_number_generator(
-                                         0.3),
-                                     beta_angular_speed_generator=shapes.default_number_generator(
-                                         2),
-                                     gamma_angular_speed_generator=shapes.default_number_generator(
-                                         0)
-                                 )
-                                 )
+tri2 = shapes.InfiniteTriangle3D(
+        base_size=TRIANGLE_SIZE_2, num_triangles=13,
+        generators={
+            'center3d_generator': gene(v2tov3(halfer(TRIANGLE_SIZE_2))),
+            'color_generator': shapes.default_color_generator(color=COLOR_GREEN),
+            'zoom_generator': gene(0.3),
+            'alpha_angle_generator': shapes.infinite_grower(step=-1),
+            'gamma_angle_generator': gene(0),
+            'translation_generator': gene(v2tov3(halfer(TRIANGLE_SIZE_2))),
+            }
+        )
 tri2.rect.center = screen.get_rect().center
 
 grid = shapes.Grid(base_size=GRID_SIZE, generators={
@@ -81,9 +105,10 @@ grid2 = shapes.Grid3D(base_size=None, generators={
     'color_generator': shapes.advanced_color_generator(r_gen=shapes.default_number_generator(255), a_gen=shapes.default_number_generator(128), change_after=100),
     'zoom_generator': shapes.default_number_generator(1),
     # 'alpha_angular_speed_generator': shapes.iterable_looper((1,)*1000 + (-1,)*1000),
-    'alpha_angular_speed_generator': shapes.series_generator([-90]),
+    'alpha_angle_generator': shapes.default_number_generator(-90),
     'spacing_x_generator': shapes.default_number_generator(30),
     'spacing_y_generator': shapes.default_number_generator(30),
+    'translation_generator': NULL_V3_GEN,
     'center3d_generator': shapes.default_number_generator(
         [600, 450, 0]),
 },
@@ -92,8 +117,8 @@ grid2 = shapes.Grid3D(base_size=None, generators={
 grid2.rect.center = MIDDLE_MIDDLE
 #grid2.rect.center = BOTTOM_MIDDLE
 clock = pygame.time.Clock()
-allsprites = pygame.sprite.Group((tri, tri2, grid2))
-#allsprites = pygame.sprite.Group((tri2,))
+allsprites = pygame.sprite.Group((tri, tri2, grid2, grid))
+# allsprites = pygame.sprite.Group((tri2,))
 #allsprites = pygame.sprite.Group((tri, grid))
 #allsprites = pygame.sprite.Group((grid2,))
 

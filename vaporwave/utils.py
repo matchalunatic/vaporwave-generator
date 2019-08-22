@@ -3,6 +3,9 @@ from pygame.locals import *
 from pygame.math import Vector2, Vector3
 import math
 import numpy
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 _image_cache = {}
@@ -11,31 +14,63 @@ _image_cache = {}
 class DummyRect(object):
     center = [0, 0]
 
+# stolen on https://stackoverflow.com/questions/10823877/what-is-the-fastest-way-to-flatten-arbitrarily-nested-lists-in-python
+# thanks Noctys Skytower
 
-def init_generators(obj, generators=None):
-    if generators is None:
-        generators = {}
-    angular_speed_generator = generators.pop('angular_speed_generator', None)
-    color_generator = generators.pop('color_generator', None)
-    width_generator = generators.pop('width_generator', None)
-    zoom_generator = generators.pop('zoom_generator', None)
-    alpha_generator = generators.pop('alpha_generator', None)
-    if color_generator is None:
-        color_generator = default_color_generator()
-    if width_generator is None:
-        width_generator = default_width_generator()
-    if angular_speed_generator is None:
-        angular_speed_generator = default_angular_speed_generator()
-    if zoom_generator is None:
-        zoom_generator = default_zoom_generator()
-    if alpha_generator is None:
-        alpha_generator = default_alpha_generator()
-    obj.color_generator = color_generator
-    obj.width_generator = width_generator
-    obj.angular_speed_generator = angular_speed_generator
-    obj.zoom_generator = zoom_generator
-    obj.alpha_generator = alpha_generator
+def flatten(iterable):
+    iterator, sentinel, stack = iter(iterable), object(), []
+    while True:
+        value = next(iterator, sentinel)
+        if value is sentinel:
+            if not stack:
+                break
+            iterator = stack.pop()
+        elif any(isinstance(value, t) for t in (Vector2, Vector3, str)):
+            yield value
+        else:
+            try:
+                new_iterator = iter(value)
+            except TypeError:
+                yield value
+            else:
+                stack.append(iterator)
+                iterator = new_iterator
 
+
+def replace_items(iterable_structured, iterable_unstructured):
+    """Replace elements inplace the first iterable by elements in the second iterable
+
+       Basically used to undo flatten() after transformations
+    """
+    iterator, sentinel, stack = iter(iterable_structured), object(), []
+    current_indexed = iterable_structured
+    index = 0
+    list_replacers = list(iterable_unstructured)
+    index_2 = 0
+    while True:
+        value = next(iterator, sentinel)
+        if value is sentinel:
+            if not stack:
+                break
+            iterator, current_indexed, index = stack.pop()
+        elif any(isinstance(value, t) for t in (Vector2, Vector3, str)):
+            # replace stuff in the current iterator
+            current_indexed[index] = list_replacers[index_2]
+            index_2 += 1
+        else:
+            try:
+                new_iterator = iter(value)
+                current_indexed = value
+            except TypeError:
+                # here we must replace aswell
+                current_indexed[index] = list_replacers[index_2]
+                index_2 += 1
+            else:
+                stack.append((iterator, value, index))
+                index = -1
+                iterator = new_iterator
+        index += 1
+                
 
 def load_image(name):
     img = _image_cache.get(name)
@@ -59,9 +94,6 @@ def default_color_generator(color=(128, 0, 0)):
 def default_number_generator(num=10):
     while True:
         yield num
-
-
-
 
 
 def tuple_minimal_total(minimum_value, a_tuple, intify=True, max_value=255):
@@ -280,21 +312,17 @@ def project_v3_on_viewport(v3, viewport=None):
     return o
 
 
-def project_v3_camera(v3_ps, v3_cam, v3_screen=None, v3_cam_angle=None, aspect_ratio=1):
-    """Correct formula for perspective
+def infinite_grower(start=0, step=1):
+    while True:
+        yield start
+        start += step
 
-       v3_ps: list of position of the points to be projected
-       v3_cam: position of the camera
-       v3_screen: position of the screen [default: (0;0;1)]
-       v3_cam_angle: alpha, beta, gamma of camera [default 0;0;0)]
 
-       I suck at matrices so I took the formulas from wikipedia
-    """
-    if v3_screen is None:
-        v3_screen = Vector3(0, 0, 1)
-    if v3_cam_angle is None:
-        v3_cam_angle = Vector3(0, 0, 0)
-    
+rescache = {}
+def prepare_rotation_matrix(v3_cam, v3_screen, v3_cam_angle):
+    key = str((v3_cam, v3_screen, v3_cam_angle))
+    if key in rescache:
+        return rescache[key]
     t_x, t_y, t_z = v3_cam_angle[:]
     e_x, e_y, e_z = v3_screen[:]
     c = lambda x: math.cos(x)
@@ -322,7 +350,28 @@ def project_v3_camera(v3_ps, v3_cam, v3_screen=None, v3_cam_angle=None, aspect_r
     ])
     rotation = numpy.matmul(cam_rot_mat_t_x, cam_rot_mat_t_y)
     rotation = numpy.matmul(rotation, cam_rot_mat_t_z)
+    if len(rescache) > 100:
+        rescache.clear()
+    rescache[key] = rotation, screen_mat
+    return rotation, screen_mat
 
+
+def project_v3_camera(v3_ps, v3_cam, v3_screen=None, v3_cam_angle=None, aspect_ratio=1):
+    """Correct formula for perspective
+
+       v3_ps: list of position of the points to be projected
+       v3_cam: position of the camera
+       v3_screen: position of the screen [default: (0;0;1)]
+       v3_cam_angle: alpha, beta, gamma of camera [default 0;0;0)]
+
+       I suck at matrices so I took the formulas from wikipedia
+    """
+    if v3_screen is None:
+        v3_screen = Vector3(0, 0, 1)
+    if v3_cam_angle is None:
+        v3_cam_angle = Vector3(0, 0, 0)
+    
+    rotation, screen_mat = prepare_rotation_matrix(v3_cam, v3_screen, v3_cam_angle)
     out = []
     for v3_p in v3_ps:
         translated_p = numpy.array(list(v3_p - v3_cam))
@@ -333,6 +382,30 @@ def project_v3_camera(v3_ps, v3_cam, v3_screen=None, v3_cam_angle=None, aspect_r
         proj_2d = Vector2(aspect_ratio * homo_proj[0] / homo_proj[2], homo_proj[1] / homo_proj[2])
         out.append(proj_2d)
     return out
+
+def project_v3_camera_point(v3_p, v3_cam, v3_screen=None, v3_cam_angle=None, aspect_ratio=1):
+    """Correct formula for perspective
+
+       v3_ps: list of position of the points to be projected
+       v3_cam: position of the camera
+       v3_screen: position of the screen [default: (0;0;1)]
+       v3_cam_angle: alpha, beta, gamma of camera [default 0;0;0)]
+
+       I suck at matrices so I took the formulas from wikipedia
+    """
+    if v3_screen is None:
+        v3_screen = Vector3(0, 0, 1)
+    if v3_cam_angle is None:
+        v3_cam_angle = Vector3(0, 0, 0)
+    
+    rotation, screen_mat = prepare_rotation_matrix(v3_cam, v3_screen, v3_cam_angle)
+    translated_p = numpy.array(list(v3_p - v3_cam))
+    transformed_p = numpy.matmul(rotation, translated_p)
+    homo_proj = numpy.matmul(screen_mat, transformed_p)
+    if homo_proj[2] < 0.0001:
+        homo_proj[2] = 0.0001
+    proj_2d = Vector2(aspect_ratio * homo_proj[0] / homo_proj[2], homo_proj[1] / homo_proj[2])
+    return proj_2d
 
     
 
