@@ -70,7 +70,7 @@ def transformation_zoom(object, points):
         rel_point = point - center
         # multiply said coordinates by zoom factor
         zf = object.zoom
-        out.append(Vector2(*center) + zf * Vector2(*point))
+        out.append(Vector2(*rel_point) * zf + center)
     return out
 
 
@@ -88,11 +88,24 @@ def transformation_translation(object, points):
 def transformation_projection3d(object, points):
     return project_v3_camera(
             points,
-            v3_cam=object.camCenter,
-            v3_screen=Vector3(0, 0, 350),
-            v3_cam_angle=Vector3(-math.pi/3, 0, 0),
-            aspect_ratio=3
+            v3_cam=object.cam_center,
+            v3_screen=object.cam_screen,
+            v3_cam_angle=object.cam_angle,
+            aspect_ratio=object.cam_aspect_ratio,
             )
+
+
+def transformation_projection_offset(object, points):
+    #screen = pygame.display.get_surface()
+    #screen_size = scrw, scrh = screen.get_size()
+    #offset = Vector2(scrw/2, scrh/2)
+    act_w, act_h, maxlen_x, maxlen_y, center = object.get_geometry()
+    offset = Vector2(maxlen_x / 2, maxlen_y / 2)
+
+    out = []
+    for point in points:
+        out.append(point + offset)
+    return out
 
 
 class GeometrySprite(pygame.sprite.Sprite):
@@ -146,6 +159,17 @@ class GeometrySprite(pygame.sprite.Sprite):
             'gamma_angle_generator', None)
         center3d_generator = generators.pop(
             'center3d_generator', None)
+        cam_screen_generator = generators.pop(
+            'cam_screen_generator', None)
+        cam_center_generator = generators.pop(
+            'cam_center_generator', None)
+        cam_angle_generator = generators.pop(
+            'cam_angle_generator', None)
+        cam_aspect_ratio_generator = generators.pop(
+            'cam_aspect_ratio_generator', None)
+
+        if base_size == None:
+            base_size = screen_size
 
         if color_generator is None:
             color_generator = default_color_generator()
@@ -166,8 +190,18 @@ class GeometrySprite(pygame.sprite.Sprite):
         if center3d_generator is None:
             center3D = Vector3(scrw // 2, scrh // 2, 0)
             center3d_generator = default_number_generator(center3D)
-        if base_size == None:
-            base_size = screen_size
+        if cam_screen_generator is None:
+            cam_screen = Vector3(0, 0, max(base_size))
+            cam_screen_generator = default_number_generator(cam_screen)
+        if cam_center_generator is None:
+            cam_center = Vector3(0, 0, 0)
+            cam_center_generator = default_number_generator(cam_center)
+        if cam_angle_generator is None:
+            cam_angle = Vector3(0, 0, 0)
+            cam_angle_generator = default_number_generator(cam_angle)
+        if cam_aspect_ratio_generator is None:
+            cam_aspect_ratio = 1
+            cam_aspect_ratio_generator = default_number_generator(cam_aspect_ratio)
         self.color_generator = color_generator
         self.stroke_width_generator = stroke_width_generator
         self.zoom_generator = zoom_generator
@@ -178,12 +212,17 @@ class GeometrySprite(pygame.sprite.Sprite):
         self.beta_angle_generator = beta_angle_generator
         self.gamma_angle_generator = gamma_angle_generator
         self.center3d_generator = center3d_generator
+        self.cam_screen_generator = cam_screen_generator
+        self.cam_center_generator = cam_center_generator
+        self.cam_angle_generator = cam_angle_generator
+        self.cam_aspect_ratio_generator = cam_aspect_ratio_generator
 
         self.build_transform_workflow()
 
         self.screen_size = screen_size
         base_w, base_h = base_size
 
+        # these sizes should never be mutated
         self.base_w = base_w
         self.base_h = base_h
         
@@ -192,26 +231,32 @@ class GeometrySprite(pygame.sprite.Sprite):
             raise RuntimeError("Some generators remain unhandled")
 
         self.rect = DummyRect()
+        self.keep_centered = False
+        self.adapt_surface = True
+
         self.debug = False
         super(GeometrySprite, self).__init__()
         self.update()
 
     def build_transform_workflow(self):
         self.transform_workflow = [
-            transformation_zoom,
             transformation_translation,
+            transformation_zoom,
+            transformation_projection_offset,
                 ]
 
     def get_geometry(self):
         """return act_w, act_h, maxlen_x, maxlen_y, center"""
         act_w, act_h = self.zoom * self.base_w, self.zoom * self.base_h
-        maxlen_x = math.sqrt(act_w**2 + act_h**2)
-        maxlen_y = maxlen_x
+        maxlen_x = act_w# math.sqrt(act_w**2 + act_h**2)
+        maxlen_y = act_h# maxlen_x
 
         maxlen_x, maxlen_y = min(maxlen_x, self.screen_size[0]), min(
             maxlen_y, self.screen_size[1])
 
-        center = (maxlen_x // 2, maxlen_y // 2)
+        s_w, s_h  = self.screen_size
+        # center = (maxlen_x // 2, maxlen_y // 2)
+        center = Vector2(s_w / 2, s_h / 2)
         return act_w, act_h, maxlen_x, maxlen_y, center
 
     def generate_points(self, points):
@@ -246,27 +291,48 @@ class GeometrySprite(pygame.sprite.Sprite):
         self.prepare_basic_shape()
         points = self.do_geometric_transform(self.flatten_points())
         
-        surface = pygame.Surface((maxlen_x, maxlen_y), pygame.SRCALPHA, 32)
+        points = self.generate_points(points)
+
+        fla = list(flatten(points))
+        min_x, max_x = min(a[0] for a in fla), max(a[0] for a in fla)
+        min_y, max_y = min(a[1] for a in fla), max(a[1] for a in fla)
+
+
+        surface_w, surface_h = maxlen_x, maxlen_y
+
+        if self.adapt_surface:
+            totalw = max_x - min_x
+            totalh = max_y - min_y
+            screenw, screenh = self.screen_size
+            surface_w = min(totalw, screenw) 
+            surface_h = min(totalh, screenh)
+ 
+        screen_size = self.screen_size
+        #surface = pygame.Surface((surface_w, surface_h), pygame.SRCALPHA, 32)
+        surface = pygame.Surface(screen_size, pygame.SRCALPHA, 32)
         if self.debug:
+            surface.fill((255, 255, 255, 80))
             mark_surface(surface)
 
-        points = self.generate_points(points)
         for drawable in points:
             if self.color_per_draw:
                 self.color = next(self.color_generator)
             if self.stroke_width_per_draw:
                 self.color = next(self.stroke_width_generator)
+            if self.debug:
+                logger.debug(drawable, 'draw')
             try:
-                self.draw_function(surface, self.color, drawable, self.stroke_width)
+                drawed = self.draw_function(surface, self.color, drawable, self.stroke_width)
+                
             except TypeError as e:
                 logger.error("Drawing error:\n%s", traceback.format_exc())
                 logger.error("Parameters: surface %s color %s stroke_width %s drawable %s", surface, self.color, self.stroke_width, drawable)
                 raise
         surface.convert()
-        oldrect = self.rect
+        self.oldrect = self.rect
         self.image, self.rect = surface, surface.get_rect()
         # should I really do this?? probably this is a safe default
-        self.rect.center = oldrect.center
+        self.rect.center = self.oldrect.center
         
     def update(self):
         super(GeometrySprite, self).update()
@@ -277,14 +343,18 @@ class GeometrySprite(pygame.sprite.Sprite):
         self.beta_angle = next(self.beta_angle_generator)
         self.gamma_angle = next(self.gamma_angle_generator)
         self.center3d = next(self.center3d_generator)
+        self.cam_angle = next(self.cam_angle_generator)
+        self.cam_screen = next(self.cam_screen_generator)
+        self.cam_center = next(self.cam_center_generator)
+        self.cam_aspect_ratio = next(self.cam_aspect_ratio_generator)
         if not self.color_per_draw:
             self.color = next(self.color_generator)
         if not self.stroke_width_per_draw:
             self.stroke_width = next(self.stroke_width_generator)
-        # temporary
-        #self.camCenter += Vector3(0, 0, 1)
-        #if self.camCenter[2] > 0:
-        #    self.camCenter[2] = -400
         self.draw_surface()
+        self.update_position()
 
-
+    def update_position(self):
+        return
+        self.rect.left = 0
+        self.rect.top = 0

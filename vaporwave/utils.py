@@ -322,7 +322,8 @@ rescache = {}
 def prepare_rotation_matrix(v3_cam, v3_screen, v3_cam_angle):
     key = str((v3_cam, v3_screen, v3_cam_angle))
     if key in rescache:
-        return rescache[key]
+        pass
+        # return rescache[key]
     t_x, t_y, t_z = v3_cam_angle[:]
     e_x, e_y, e_z = v3_screen[:]
     c = lambda x: math.cos(x)
@@ -377,8 +378,8 @@ def project_v3_camera(v3_ps, v3_cam, v3_screen=None, v3_cam_angle=None, aspect_r
         translated_p = numpy.array(list(v3_p - v3_cam))
         transformed_p = numpy.matmul(rotation, translated_p)
         homo_proj = numpy.matmul(screen_mat, transformed_p)
-        if homo_proj[2] < 0.0001:
-            homo_proj[2] = 0.0001
+        if homo_proj[2] < 0.00001:
+            homo_proj[2] = 0.00001
         proj_2d = Vector2(aspect_ratio * homo_proj[0] / homo_proj[2], homo_proj[1] / homo_proj[2])
         out.append(proj_2d)
     return out
@@ -402,8 +403,8 @@ def project_v3_camera_point(v3_p, v3_cam, v3_screen=None, v3_cam_angle=None, asp
     translated_p = numpy.array(list(v3_p - v3_cam))
     transformed_p = numpy.matmul(rotation, translated_p)
     homo_proj = numpy.matmul(screen_mat, transformed_p)
-    if homo_proj[2] < 0.0001:
-        homo_proj[2] = 0.0001
+    #if homo_proj[2] < 0.0001:
+    #    homo_proj[2] = 0.0001
     proj_2d = Vector2(aspect_ratio * homo_proj[0] / homo_proj[2], homo_proj[1] / homo_proj[2])
     return proj_2d
 
@@ -458,3 +459,26 @@ def mark_surface(surf, message="here"):
     surf.blit(tr, tr_rect)
     surf.blit(bl, bl_rect)
     surf.blit(br, br_rect)
+
+
+
+def camera_generator(start_pos=Vector3(0, 0, 0), increment_vector=Vector3(0, 0, 0), min_x=None, min_y=None, min_z=None, max_x=None, max_y=None, max_z=None):
+    initial_x, initial_y, initial_z = start_pos
+    while True:
+        yield start_pos
+        start_pos = start_pos + increment_vector
+        
+        if max_x is not None and start_pos[0] > max_x:
+            start_pos[0] = initial_x
+        if max_y is not None and start_pos[1] > max_y:
+            start_pos[1] = initial_y
+        if max_z is not None and start_pos[2] > max_z:
+            start_pos[2] = initial_z 
+        if min_x is not None and start_pos[0] < min_x:
+            start_pos[0] = initial_x
+        if min_y is not None and start_pos[1] < min_y:
+            start_pos[1] = initial_y
+        if min_z is not None and start_pos[2] < min_z:
+            start_pos[2] = initial_z 
+
+

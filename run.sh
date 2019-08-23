@@ -5,4 +5,4 @@ source venv/bin/activate
 pip install -r requirements.txt
 done
 source venv/bin/activate
-python -m vaporwave
+python -m vaporwave $@

@@ -59,24 +59,11 @@ class Grid(LineSprite):
 
 
 class Grid3D(Grid):
-    def __init__(self, base_size=None, generators=None):
-        if generators is None:
-            generators = {}
-        # temporary
-        self.camCenter = Vector3(600, -100, -400)
-        super(Grid3D, self).__init__(base_size,generators)
-
     def build_transform_workflow(self):
         self.transform_workflow = [
             enforce_v3,
             transformation_rotation3d,
             transformation_translation3d,
             transformation_projection3d,
+            transformation_projection_offset,
         ]
-
-    def update(self):
-        # temporary
-        self.camCenter += Vector3(0, 0, 1)
-        if self.camCenter[2] > 0:
-            self.camCenter[2] = -400
-        super(Grid3D, self).update()
