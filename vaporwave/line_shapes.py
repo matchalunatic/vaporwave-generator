@@ -14,6 +14,7 @@ class LineSprite(GeometrySprite):
         return lambda surface, color, shape, width=1: pygame.draw.line(surface, color, shape[0], shape[1], width)
 
 
+
 class Grid(LineSprite):
     """2D grid"""
 
@@ -32,22 +33,25 @@ class Grid(LineSprite):
         super(Grid, self).__init__(base_size, generators)
 
     def prepare_basic_shape(self):
-        act_w, act_h, maxlen_x, maxlen_y, center = self.get_geometry()
+        # act_w, act_h, maxlen_x, maxlen_y, center = self.get_geometry()
+        base_w, base_h = self.base_size
         spacing_x, spacing_y = self.spacing_x, self.spacing_y
-        line_count_h = int(maxlen_y // spacing_y) 
-        line_count_v = int(maxlen_x // spacing_x)
+        line_count_v = math.ceil(base_w / spacing_x)
+        line_count_h = math.ceil(base_h / spacing_y)
+        line_len_v = base_h
+        line_len_h = base_w
         lines = []
         for i in range(0, line_count_h):
             points = [
                 Vector2(0, i * spacing_y),
-                Vector2(maxlen_x, i * spacing_y)
+                Vector2(line_len_h, i * spacing_y)
             ]
             points = list(p for p in points)
             lines.append(points)
         for i in range(0, line_count_v):
             points = [
                 Vector2(i * spacing_x, 0),
-                Vector2(i * spacing_x, maxlen_y)
+                Vector2(i * spacing_x, line_len_v)
             ]
             lines.append(points)
         self.points = lines
@@ -59,6 +63,10 @@ class Grid(LineSprite):
 
 
 class Grid3D(Grid):
+    @property
+    def is_3d(self):
+        return True
+
     def build_transform_workflow(self):
         self.transform_workflow = [
             enforce_v3,

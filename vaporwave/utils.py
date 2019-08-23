@@ -176,7 +176,8 @@ def default_spacing_generator(spacing=10):
         yield spacing
 
 
-def default_zoom_generator(zoom_cycle=[0.6, 1, 3, 7, 2, 0.5, ], periods=[10, 30]):
+
+def zoom_generator(zoom_cycle=[0.6, 1, 3, 7, 2, 0,5, ], periods=[10, 30]):
     len_zooms = len(zoom_cycle)
     len_periods = len(periods)
     i = 1
@@ -190,6 +191,9 @@ def default_zoom_generator(zoom_cycle=[0.6, 1, 3, 7, 2, 0.5, ], periods=[10, 30]
             d += 1
             d = d % len_periods
         yield zoom_cycle[c]
+
+def default_zoom_generator(zoom_cycle=[1], periods=[1000]):
+    return zoom_generator(zoom_cycle, periods)
 
 
 def default_alpha_generator(alpha_cycle=[180, 255, 40, 62, 230, 100, ], periods=[10, 30, 20, 40, 20]):
@@ -482,3 +486,21 @@ def camera_generator(start_pos=Vector3(0, 0, 0), increment_vector=Vector3(0, 0, 
             start_pos[2] = initial_z 
 
 
+
+def integerize(generator, multiplicator=1):
+    sentinel = object()
+    while True:
+        a = next(generator, sentinel)
+        if a is sentinel:
+            break
+        yield int(a*multiplicator)
+
+
+
+# debug util
+def getminmax_xy(points):
+    return (min(a[0] for a in points),
+            max(a[0] for a in points),
+            min(a[1] for a in points),
+            max(a[1] for a in points),
+            )

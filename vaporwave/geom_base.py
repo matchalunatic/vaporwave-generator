@@ -63,6 +63,7 @@ def transformation_zoom(object, points):
     """2D zoom transformation"""
     act_w, act_h, maxlen_x, maxlen_y, center = object.get_geometry()
     # get point coordinates relative to zoom
+    center = Vector2(object.base_w/2, object.base_h/2)
     out = []
     for point in points:
         if len(point) != 2:
@@ -96,15 +97,19 @@ def transformation_projection3d(object, points):
 
 
 def transformation_projection_offset(object, points):
-    #screen = pygame.display.get_surface()
-    #screen_size = scrw, scrh = screen.get_size()
-    #offset = Vector2(scrw/2, scrh/2)
+    screen = pygame.display.get_surface()
+    screen_size = scrw, scrh = screen.get_size()
+    screen_center = Vector2(scrw/2, scrh/2)
     act_w, act_h, maxlen_x, maxlen_y, center = object.get_geometry()
-    offset = Vector2(maxlen_x / 2, maxlen_y / 2)
+    base_half_size = Vector2(object.base_size) / 2
+    offset = screen_center -  base_half_size
+    if object.is_3d:
+        offset = screen_center
 
     out = []
     for point in points:
         out.append(point + offset)
+    # print(getminmax_xy(out))
     return out
 
 
@@ -115,8 +120,12 @@ class GeometrySprite(pygame.sprite.Sprite):
        This is for all sprites that that make use of pygame.draw to draw
        a basic geometric shape that will be redrawn over and over with varying
        parameters, endure many parameters transformations, ...
-       
+      
     """
+
+    @property
+    def is_3d(self):
+        return False
 
     @property
     def draw_function(self):
@@ -232,7 +241,6 @@ class GeometrySprite(pygame.sprite.Sprite):
 
         self.rect = DummyRect()
         self.keep_centered = False
-        self.adapt_surface = True
 
         self.debug = False
         super(GeometrySprite, self).__init__()
@@ -293,25 +301,13 @@ class GeometrySprite(pygame.sprite.Sprite):
         
         points = self.generate_points(points)
 
-        fla = list(flatten(points))
-        min_x, max_x = min(a[0] for a in fla), max(a[0] for a in fla)
-        min_y, max_y = min(a[1] for a in fla), max(a[1] for a in fla)
-
 
         surface_w, surface_h = maxlen_x, maxlen_y
 
-        if self.adapt_surface:
-            totalw = max_x - min_x
-            totalh = max_y - min_y
-            screenw, screenh = self.screen_size
-            surface_w = min(totalw, screenw) 
-            surface_h = min(totalh, screenh)
- 
         screen_size = self.screen_size
-        #surface = pygame.Surface((surface_w, surface_h), pygame.SRCALPHA, 32)
         surface = pygame.Surface(screen_size, pygame.SRCALPHA, 32)
         if self.debug:
-            surface.fill((255, 255, 255, 80))
+            surface.fill((255, 255, 255, 30))
             mark_surface(surface)
 
         for drawable in points:
@@ -320,10 +316,9 @@ class GeometrySprite(pygame.sprite.Sprite):
             if self.stroke_width_per_draw:
                 self.color = next(self.stroke_width_generator)
             if self.debug:
-                logger.debug(drawable, 'draw')
+                logger.debug("%s -> draw", drawable)
             try:
                 drawed = self.draw_function(surface, self.color, drawable, self.stroke_width)
-                
             except TypeError as e:
                 logger.error("Drawing error:\n%s", traceback.format_exc())
                 logger.error("Parameters: surface %s color %s stroke_width %s drawable %s", surface, self.color, self.stroke_width, drawable)
@@ -332,7 +327,7 @@ class GeometrySprite(pygame.sprite.Sprite):
         self.oldrect = self.rect
         self.image, self.rect = surface, surface.get_rect()
         # should I really do this?? probably this is a safe default
-        self.rect.center = self.oldrect.center
+        # self.rect.center = self.oldrect.center
         
     def update(self):
         super(GeometrySprite, self).update()

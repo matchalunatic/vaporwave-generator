@@ -21,6 +21,18 @@ class PolygonSprite(GeometrySprite):
         replace_items(self.points, points)
         return list(self.points)
     
+class Square(PolygonSprite):
+    """Basic square"""
+    def prepare_basic_shape(self):
+        base_w, base_h = self.base_size
+        contraction = 0
+        self.points =[ [
+                Vector2(contraction, contraction),
+                Vector2(contraction, base_w-contraction),
+                Vector2(base_w-contraction, base_h-contraction),
+                Vector2(base_h-contraction, contraction),
+                ] ]
+
 class InfiniteTriangle(PolygonSprite):
     """Symmetric triangles
            A
@@ -36,7 +48,7 @@ class InfiniteTriangle(PolygonSprite):
     def prepare_basic_shape(self):
         act_w, act_h, maxlen_x, maxlen_y, center = self.get_geometry()
         polys = list()
-        for idx in range(1, self.num_triangles + 1):
+        for idx in range(0, self.num_triangles + 1):
             ratio = idx / self.num_triangles / 2
             a_x = self.base_w // 2 
             a_y = ratio * self.base_h 
@@ -59,6 +71,10 @@ class InfiniteTriangle(PolygonSprite):
 
 
 class InfiniteTriangle3D(InfiniteTriangle):
+    @property
+    def is_3d(self):
+        return False
+
     def build_transform_workflow(self):
         self.transform_workflow = [
             enforce_v3,
