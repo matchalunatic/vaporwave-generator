@@ -75,12 +75,30 @@ def transformation_zoom(object, points):
     return out
 
 
+def transformation_zoom3d(object, points):
+    """2D zoom transformation"""
+    act_w, act_h, maxlen_x, maxlen_y, center = object.get_geometry()
+    # get point coordinates relative to zoom
+    out = []
+#    min_x, max_z, min_y, max_y, min_z, max_z = getminmax_xyz(flatten(object.points))
+    center = object.center3d
+    for point in points:
+        if len(point) != 3:
+            logger.error("Tried to zoom a non-3D point: %s", point)
+        rel_point = point - center
+        # multiply said coordinates by zoom factor
+        zf = object.zoom
+        out.append(Vector3(*rel_point) * zf + center)
+    return out
+
+
+
 def transformation_translation(object, points):
     """2D translate"""
     out = []
     for point in points:
         if len(point) != 2:
-            logger.error("Tried to zoom a non-point: %s", point)
+            logger.error("Tried to do translation of a non-2D point: %s", point)
         translation = object.translation
         out.append(Vector2(*translation) + Vector2(*point))
     return out

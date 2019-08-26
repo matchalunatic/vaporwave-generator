@@ -23,3 +23,6 @@ i f   y o u  e n j o y    t h i s
 ~ please consider supporting my creative programming work
 
 https://www.patreon.com/Matcha
+
+Arwing by dlfon99 / https://www.models-resource.com/custom_edited/starfoxcustoms/model/16500/
+

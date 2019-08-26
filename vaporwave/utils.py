@@ -496,6 +496,23 @@ def integerize(generator, multiplicator=1):
         yield int(a*multiplicator)
 
 
+def v4_to_v3(o):
+    if len(o) == 4:
+        return Vector3([float(a) / float(o[3]) for a in o[0:3]])
+    elif len(o) == 3:
+        return Vector3([float(a) for a in o])
+    else:
+        raise RuntimeError("v4_to_v3: wrong parameter passed")
+
+def getminmax_xyz(points):
+    return (min(a[0] for a in points),
+            max(a[0] for a in points),
+            min(a[1] for a in points),
+            max(a[1] for a in points),
+            min(a[2] for a in points),
+            max(a[2] for a in points),
+            )
+
 
 # debug util
 def getminmax_xy(points):
@@ -504,3 +521,4 @@ def getminmax_xy(points):
             min(a[1] for a in points),
             max(a[1] for a in points),
             )
+

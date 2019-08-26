@@ -57,7 +57,7 @@ UNITY_V2 = Vector2(0, 1)
 
 pygame.init()
 screen = pygame.display.set_mode(SCREEN_SIZE, 0, 32)
-pygame.display.set_caption('w u t  i s  t h i s')
+pygame.display.set_caption('w u t     i s                   t h i s')
 pygame.mouse.set_visible(0)
 
 background = pygame.Surface(screen.get_size())
@@ -110,7 +110,7 @@ tri2 = shapes.InfiniteTriangle3D(
         generators={
             'center3d_generator': gene(Vector3(tx/2, ty/2, 0)),
             'color_generator': default_color_generator(color=COLOR_GREEN),
-            'zoom_generator': gene(1),
+            'zoom_generator': gene(2),
             'alpha_angle_generator': infinite_grower(step=-1),
             'beta_angle_generator': gene(0), # shapes.infinite_grower(step=-1),
             'gamma_angle_generator': gene(0),
@@ -178,6 +178,21 @@ groove = shapes.SingleGroove(base_size=(300, 300), generators={
 groove.rect.center = MIDDLE_MIDDLE
 
 
+arwing = shapes.ObjSprite3D(file_path='assets/arwing.obj', base_size=None, generators={
+    'color_generator': advanced_color_generator(r_gen=gene(255), a_gen=gene(128), change_after=1),
+    'zoom_generator': gene(40), 
+    'alpha_angle_generator': gene(0),
+    'beta_angle_generator': infinite_grower(step=1),
+    'gamma_angle_generator': gene(180),
+    'translation_generator': NULL_V3_GEN,
+    'cam_center_generator': gene(Vector3(0, 200, -1000)), 
+    'cam_angle_generator': NULL_V3_GEN,
+    'cam_screen_generator': gene(Vector3(0, 0, 1000)), # shapes.camera_generator(Vector3(0, 0, 1), Vector3(0, 0, 50), max_z=2000), #gene(Vector3(0, 0, 200)),
+    'cam_aspect_ratio_generator': gene(0.75),
+
+    }
+)
+
 names = {
 'tri': tri,
 'tri2': tri2,
@@ -185,6 +200,7 @@ names = {
 'square': square,
 'grid2': grid2,
 'groove': groove,
+'arwing': arwing,
         }
 
 elems = tuple(b for a, b in names.items() if a in the_args)
