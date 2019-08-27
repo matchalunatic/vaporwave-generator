@@ -2,6 +2,7 @@ import pygame
 from pygame.locals import *
 from pygame.math import Vector2, Vector3
 from . import shapes
+from . import glitches
 from .utils import *
 import logging
 import sys
@@ -149,13 +150,14 @@ square = shapes.Square(base_size=SQUARE_SIZE, generators={
 square.rect.center = MIDDLE_MIDDLE
 square.debug = False
 
-grid2 = shapes.Grid3D(base_size=None, generators={
-    'color_generator': advanced_color_generator(r_gen=gene(255), a_gen=gene(128), change_after=1),
+grid2 = shapes.Grid3D(base_size=(300, 1200), generators={
+    'color_generator': advanced_color_generator(r_gen=gene(230), a_gen=gene(128), change_after=1),
+#    'color_generator': gene((255, 255, 255, 255)),
     'zoom_generator': gene(1),
     'alpha_angle_generator': gene(0),
     'spacing_x_generator': gene(30),
     'spacing_y_generator': gene(30),
-    'translation_generator': NULL_V3_GEN,
+    'translation_generator': gene(Vector3(450, -600, 0)),
 #    'cam_center_generator': gene(Vector3(600, 600, -100)),
     'cam_center_generator': camera_generator(Vector3(600, 600, -50), increment_vector=Vector3(0, -1, 0), min_y=300),
     'cam_angle_generator': gene(Vector3(math.pi/9, 0, 0)),
@@ -171,6 +173,7 @@ clock = pygame.time.Clock()
 
 groove = shapes.SingleGroove(base_size=(300, 300), generators={
     'amplitude_end_generator': sin_wave_angular_speed_generator(baseline=math.pi+0.01, mul=math.pi*0.99),
+    'color_generator': gene((128, 128, 128, 255)),
     'alpha_angle_generator': infinite_grower(step=-0.01),
     'stroke_width_generator': integerize(sin_wave_angular_speed_generator(baseline=2, mul=1, speed=5), 10),
     }
@@ -205,9 +208,20 @@ names = {
 
 elems = tuple(b for a, b in names.items() if a in the_args)
 
-allsprites = pygame.sprite.Group(elems)
 
+glitch = glitches.RGBPhaseGlitch(names[the_args[-1]], generators={
+    'r_offset_x': integerize(sin_wave_angular_speed_generator(mul=60, baseline=61, speed=1)),
+    'g_offset_x': integerize(sin_wave_angular_speed_generator(mul=120, baseline=11, speed=0.1)),
+    'b_offset_x': integerize(sin_wave_angular_speed_generator(mul=60, baseline=31, speed=0.3)),
+    'r_offset_y': integerize(sin_wave_angular_speed_generator(mul=200, baseline=-250, speed=0.5)),
+    'g_offset_y': integerize(sin_wave_angular_speed_generator(mul=300, baseline=-150, speed=1)),
+    'b_offset_y': integerize(sin_wave_angular_speed_generator(mul=100, baseline=-80, speed=0.2)),
+    'alpha': gene(200), 
+    
+    })
+elems += (glitch,)
 
+allsprites = pygame.sprite.RenderUpdates(elems)
 going = True
 
 while going:
