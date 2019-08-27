@@ -206,10 +206,10 @@ names = {
 'arwing': arwing,
         }
 
-elems = tuple(b for a, b in names.items() if a in the_args)
+elems = list(names[a] for a in the_args if a in names)
 
 
-glitch = glitches.RGBPhaseGlitch(names[the_args[-1]], generators={
+phase_glitch = glitches.RGBPhaseGlitch(elems[-1], generators={
     'r_offset_x': integerize(sin_wave_angular_speed_generator(mul=60, baseline=61, speed=1)),
     'g_offset_x': integerize(sin_wave_angular_speed_generator(mul=120, baseline=11, speed=0.1)),
     'b_offset_x': integerize(sin_wave_angular_speed_generator(mul=60, baseline=31, speed=0.3)),
@@ -219,7 +219,21 @@ glitch = glitches.RGBPhaseGlitch(names[the_args[-1]], generators={
     'alpha': gene(200), 
     
     })
-elems += (glitch,)
+
+corruption_glitch = glitches.RandomCorruptionGlitch(elems[-1], generators={
+    })
+
+lp_glitch = glitches.LocalPermutationsGlitch(elems[0], generators={
+    })
+
+glitches = {
+'g_phase': phase_glitch,
+'g_corruption': corruption_glitch,
+'g_localperm': lp_glitch,
+}
+
+glitchelems = list(glitches[a] for a in the_args if a in glitches)
+elems += glitchelems
 
 allsprites = pygame.sprite.RenderUpdates(elems)
 going = True

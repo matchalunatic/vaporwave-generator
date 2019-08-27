@@ -1,6 +1,7 @@
 import os
 import math
 import pygame
+import random
 from pygame.locals import *
 from pygame.math import Vector2, Vector3
 from .utils import *
@@ -9,6 +10,11 @@ import logging
 import traceback
 
 logger = logging.getLogger(__name__)
+
+
+def compose_colorarray(r, g, b, a):
+    return a << 24 | g << 16 | r << 8  | b << 0
+
 
 
 class Glitch(pygame.sprite.Sprite):
@@ -82,3 +88,64 @@ class RGBPhaseGlitch(Glitch):
         #            pa[x + self.r_offset_x, y + self.r_offset_y] += pa[x, y] & 0xFF0000
         #            pa[x + self.r_offset_x, y + self.r_offset_y] += pa[x, y] & 0x00FF00
         #            pa[x + self.r_offset_x, y + self.r_offset_y] += pa[x, y] & 0x0000FF
+
+
+class RandomCorruptionGlitch(Glitch):
+    def __init__(self, other_sprite, generators=None):
+        self.corruption_size = (64, 64)
+        self.corruption_pixel_size = (8, 8)
+        self.max_glitches = 12
+        self.update_every_n = 25
+        self.counter = 0
+        self.corruptions_pos = []
+        super(RandomCorruptionGlitch, self).__init__(other_sprite)
+
+    def glitch(self):
+        w, h = self.image.get_rect()[2:]
+        c_w, c_h = self.corruption_size
+        c_px, c_py = self.corruption_pixel_size
+        c_size = c_ww, c_hh = c_w // c_px, c_h // c_py
+
+        if self.counter % self.update_every_n == 0:
+            self.corruptions_pos = []
+            for _ in range(random.randint(0, self.max_glitches+1)):
+                glitch_r = numpy.random.random_integers(0, 255, c_size).astype('uint32')
+                glitch_g = numpy.random.random_integers(0, 255, c_size).astype('uint32')
+                glitch_b = numpy.random.random_integers(0, 255, c_size).astype('uint32')
+                glitch_a = numpy.random.random_integers(120, 255, c_size).astype('uint32')
+                corr = compose_colorarray(glitch_r, glitch_g, glitch_b, glitch_a)
+                corr = numpy.repeat(corr, c_px, axis=0)
+                corr = numpy.repeat(corr, c_py, axis=1)
+                g_x = random.randint(0, w-c_w-1)
+                g_y = random.randint(0, h-c_h-1)
+                self.corruptions_pos.append((g_x,g_y,corr))
+        sur = pygame.surfarray.pixels2d(self.image)
+        changed = False
+
+        for pos in self.corruptions_pos:
+            posx, posy, corruption = pos
+            sur[posx:posx+c_w,posy:posy+c_h] = corruption
+            #sur[pos[0]:pos[1] = corr
+            changed = True
+        if changed:
+            pygame.surfarray.blit_array(self.image, sur)
+        self.counter += 1
+
+
+class LocalPermutationsGlitch(Glitch):
+    def __init__(self, other_sprite, generators=None):
+        self.corruption_size = (120, 8)
+        self.max_glitches = 12
+        super(LocalPermutationsGlitch, self).__init__(other_sprite)
+
+    def glitch(self):
+        w, h = self.image.get_rect()[2:]
+        c_w, c_h = self.corruption_size
+        sur = pygame.surfarray.pixels2d(self.image)
+        for _ in range(random.randint(0, self.max_glitches+1)):
+            g_x = random.randint(0, w-c_w-1)
+            g_y = random.randint(0, h-c_h-1)
+            numpy.random.shuffle(sur[g_x:g_x+c_w,g_y:g_y+c_h])
+            
+
+            
