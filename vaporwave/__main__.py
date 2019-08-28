@@ -220,6 +220,8 @@ phase_glitch = glitches.RGBPhaseGlitch(elems[-1], generators={
     
     })
 
+convergence_glitch = glitches.ConvergenceGlitch(elems[0], generators={
+    })
 corruption_glitch = glitches.RandomCorruptionGlitch(elems[-1], generators={
     })
 
@@ -233,6 +235,7 @@ glitches = {
 'g_phase': phase_glitch,
 'g_corruption': corruption_glitch,
 'g_localperm': lp_glitch,
+'g_convergence': convergence_glitch,
 'g_chunkperm': chunkperm_glitch
 }
 

@@ -90,6 +90,24 @@ class RGBPhaseGlitch(Glitch):
         #            pa[x + self.r_offset_x, y + self.r_offset_y] += pa[x, y] & 0x0000FF
 
 
+class ConvergenceGlitch(RGBPhaseGlitch):
+    def update(self):
+        self.r_offset_x = 0
+        self.g_offset_x = -6
+        self.b_offset_x = 6
+        self.r_offset_y = 0
+        self.g_offset_y = 0
+        self.b_offset_y = 0
+        self.alpha = 255//3
+        # skip parent method and go to grandparent
+        super(RGBPhaseGlitch, self).update()
+
+    def glitch(self):
+        super(ConvergenceGlitch, self).glitch()
+        self.sprite_target.image.blit(self.image, (0, 0))
+        self.image = pygame.Surface((0, 0))
+        self.rect = (0, 0)
+
 class RandomCorruptionGlitch(Glitch):
     def __init__(self, other_sprite, generators=None):
         self.corruption_size = (64, 64)
