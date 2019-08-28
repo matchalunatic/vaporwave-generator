@@ -226,10 +226,14 @@ corruption_glitch = glitches.RandomCorruptionGlitch(elems[-1], generators={
 lp_glitch = glitches.LocalPermutationsGlitch(elems[0], generators={
     })
 
+chunkperm_glitch = glitches.ChunksPermutationsGlitch(elems[0], generators={
+    })
+
 glitches = {
 'g_phase': phase_glitch,
 'g_corruption': corruption_glitch,
 'g_localperm': lp_glitch,
+'g_chunkperm': chunkperm_glitch
 }
 
 glitchelems = list(glitches[a] for a in the_args if a in glitches)

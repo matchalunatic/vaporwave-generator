@@ -148,4 +148,45 @@ class LocalPermutationsGlitch(Glitch):
             numpy.random.shuffle(sur[g_x:g_x+c_w,g_y:g_y+c_h])
             
 
+class ChunksPermutationsGlitch(Glitch):
+    def __init__(self, other_sprite, generators=None):
+        self.max_permutations = 20
+        self.permutation_size = (128, 128)
+        self.change_after = 50
+        self.counter = 0
+        self.permutations = []
+        super(ChunksPermutationsGlitch, self).__init__(other_sprite)
+
+    def glitch(self):
+        self.image = pygame.Surface((0, 0))
+        self.rect = (0, 0)
+        w, h = self.sprite_target.image.get_rect()[2:]
+        p_w, p_h = self.permutation_size
+        sur = pygame.surfarray.pixels2d(self.sprite_target.image)
+        if self.counter % self.change_after == 0:
+            self.permutations = []
+            for _ in range(random.randint(0, self.max_permutations + 1)):
+                o_x = random.randint(0, w - p_w - 1)
+                o_y = random.randint(0, h - p_h - 1)
+                d_x = random.randint(0, w - p_w - 1)
+                d_y = random.randint(0, h - p_h - 1)
+                self.permutations.append((o_x, o_x + p_w, o_y, o_y + p_h, d_x, d_x + p_w, d_y, d_y + p_h))
+        changed = True
+        for p in self.permutations:
+            obx, oex, oby, oey, dbx, dex, dby, dey = p
+            o_chunk = sur[obx:oex, oby:oey] #.copy()
+            d_chunk = sur[dbx:dex, dby:dey]
+            # force alpha 255
+            sur[obx:oex, oby:oey] = d_chunk
+            sur[dbx:dex, dby:dey] = o_chunk
+        else:
+            changed = False
+        if changed:
+            # hide original by setting its alpha channel to 0
+            # empty original sprite
+            # self.sprite_target.image.fill((0, 0, 0, 0))
+            # display glitched
+            # pygame.surfarray.blit_array(self.image, sur)
+            self.sprite_target.blit_array(self.sprite_target.image, sur)
+        self.counter += 1
             
