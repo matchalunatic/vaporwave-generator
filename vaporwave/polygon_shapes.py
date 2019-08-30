@@ -41,7 +41,13 @@ class InfiniteTriangle(PolygonSprite):
        B       C
     """
 
-    def __init__(self, base_size=None, min_w=30, num_triangles=42, generators=None):
+    def __init__(self, base_size=None, min_w=None, num_triangles=None, generators=None):
+        if not generators:
+            generators = {}
+        if min_w is None:
+            min_w = generators.pop('min_w', 30)
+        if num_triangles is None:
+            num_triangles = generators.pop('num_triangles', 10)
         self.min_w = min_w
         self.num_triangles = num_triangles
         super(InfiniteTriangle, self).__init__(base_size, generators)

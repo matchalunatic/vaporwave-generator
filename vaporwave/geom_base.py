@@ -14,11 +14,12 @@ logger = logging.getLogger(__name__)
 def transformation_rotation2d(object, points):
     act_w, act_h, maxlen_x, maxlen_y, center = object.get_geometry()
     angle = object.alpha_angle
+    center = Vector2(object.base_w/2, object.base_h/2)
     out = []
     for point in points:
         point = Vector2(*point)
         relative_point = point - center
-        relative_point.rotate(angle)
+        relative_point = relative_point.rotate(angle)
         out.append(relative_point + center)
     return out
 
@@ -266,6 +267,7 @@ class GeometrySprite(pygame.sprite.Sprite):
 
     def build_transform_workflow(self):
         self.transform_workflow = [
+            transformation_rotation2d,
             transformation_translation,
             transformation_zoom,
             transformation_projection_offset,
@@ -318,7 +320,6 @@ class GeometrySprite(pygame.sprite.Sprite):
         points = self.do_geometric_transform(self.flatten_points())
         
         points = self.generate_points(points)
-
 
         surface_w, surface_h = maxlen_x, maxlen_y
 

@@ -242,6 +242,13 @@ def iterable_looper(iterable):
         for i in iterable:
             yield i
 
+
+def iterable_stutterer(iterable, stutter=25):
+    while True:
+        for i in iterable:
+            for _ in range(stutter):
+                yield i
+
 def rotate_point_with_center(point, center, angle):
     """angle is in degrees"""
     px, py = point

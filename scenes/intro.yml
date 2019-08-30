@@ -1,7 +1,7 @@
 global:
-    width: 1024
-    height: 768
-    title: A d e m o      s c e n e
+    width: 1280
+    height: 720
+    title: "A    d e m o      s c e n e | {scene_title}"
     framerate: 25
     background_color: (0, 0, 0, 255)
 
@@ -22,8 +22,18 @@ objects:
         random_seed: 230788
         translation_generator: utils.translation2d_generator(start_pos=Vector2(0, 0), increment_vector=Vector2(1, 0), max_vector=Vector2(7000, 0))
         color_generator: utils.default_generator((255, 255, 255, 80))
+  triangles_1:
+      type: InfiniteTriangle
+      base_size: [400, 300]
+      generators:
+          min_w: 1
+          num_triangles: 5
+          width_generator: utils.default_generator(2)
+          color_generator: utils.default_generator((255, 255, 255, 120))
+          alpha_angle_generator: utils.iterable_stutterer(utils.infinite_grower(step=-5), stutter=5)
+          zoom_generator: utils.iterable_stutterer(utils.series_generator(series=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.2, 1.4, 2.0, 2.0, 2.0, 8], lastItem=8), stutter=5)
 
-
+      
 scenes:
     - title: Intro scene
       comment: This is the intro scene. It is inspired by https://www.youtube.com/watch?v=pIub2PQ6hvY
@@ -31,3 +41,18 @@ scenes:
       objects:
           - stars_1
           - stars_2
+      music: assets/switched-on-snes.flac
+    - title: Intro 2
+      comment: Follow-up
+      duration: 500
+      objects:
+          - stars_1
+          - stars_2
+          - triangles_1
+      music: assets/switched-on-snes.flac
+    - title: Tri only
+      comment: Triangle only
+      duration: 500
+      objects:
+          - triangles_1
+      music: assets/switched-on-snes.flac

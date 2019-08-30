@@ -22,10 +22,11 @@ from pygame.locals import *
 from pygame.math import Vector2, Vector3
 
 
-Scene = namedtuple("Scene", 'title duration objects')
+Scene = namedtuple("Scene", 'title duration objects music')
 
 class SceneReader(object):
     def __init__(self, scene_path):
+        self._playing_music = None
         self.scene_path = scene_path
         self.parse_scene()
         self.init_pygame()
@@ -39,15 +40,16 @@ class SceneReader(object):
         # parse global: section
         global_d = data.get('global', {})
         width = global_d.get('width', 1200)
-        height = global_d.get('width', 900)
+        height = global_d.get('height', 900)
         title = global_d.get('title', 'default title')
+        music = global_d.get('background_music', None)
         framerate = global_d.get('framerate', os.environ.get('FR', 25))
         self.background_color = eval(str(data.get('background_color', '(0, 0, 0, 255)')), globals(), locals())
         self.width = width
         self.height = height
         self.title = title
         self.framerate = framerate
-
+        self.background_music = music
         # parse objects: section
 
     def populate_scene(self):
@@ -68,16 +70,15 @@ class SceneReader(object):
             evalstr = "shapes.{o_type}(base_size=base_size, generators=generators)".format(o_type=o_type)
 
             obj = eval(evalstr, globals(), locals())
-            print(obj)
             self.objects[objname] = obj
         for scene in data.get('scenes', []):
             title = scene.get('title', None)
             duration = scene.get('duration', 0)
+            music = scene.get('music', None)
             scene_objlist = scene.get('objects')
             scene_objs = tuple([self.objects[a] for a in scene_objlist])
-            self.scenes.append(Scene(title=title, duration=duration, objects=scene_objs))
+            self.scenes.append(Scene(title=title, duration=duration, objects=scene_objs, music=music))
 
-        print(self.objects)
 
     def parse_generators(self, generators):
         parsed = {}
@@ -91,6 +92,10 @@ class SceneReader(object):
             cursc = self.scenes[self.scene_counter]
             self.current_stage.add(*cursc.objects)
             self.scene_counter += 1
+            self.scene_title = cursc.title
+            self.background_music = cursc.music
+            self.update_title()
+            self.update_music()
             return self.scene_counter
         else:
             self.scene_counter = 0
@@ -100,11 +105,23 @@ class SceneReader(object):
         pygame.init()
         screen_size = (self.width, self.height)
         self.screen = pygame.display.set_mode(screen_size, 0, 32)
-        pygame.display.set_caption(self.title)
         self.current_stage = pygame.sprite.RenderUpdates([])
         self.clock = pygame.time.Clock()
+        pygame.mixer.init()
 
 
+    def update_music(self):
+        print("hey music", self.background_music)
+        if self.background_music == self._playing_music:
+            return
+        print("pygame music stuff")
+        pygame.mixer.music.set_volume(0.2)
+        pygame.mixer.music.load(self.background_music)
+        pygame.mixer.music.play()
+        self._playing_music = self.background_music
+
+    def update_title(self):
+        pygame.display.set_caption(self.title.format(scene_title=self.scene_title))
 
     def mainloop(self):
         self.going = True
@@ -126,6 +143,12 @@ class SceneReader(object):
                     self.load_next_scene()
                 elif event.type == KEYDOWN and event.key == K_u:
                     draw_over = not draw_over
+                elif event.type == KEYDOWN and event.key == K_s:
+                    self.framerate = 1
+                elif event.type == KEYDOWN and event.key == K_f:
+                    self.framerate = 25
+                elif event.type == KEYDOWN and event.key == K_t:
+                    self.framerate = 250
             self.current_stage.update()
             if not draw_over:
                 self.screen.blit(background, (0, 0))

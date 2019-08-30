@@ -106,7 +106,7 @@ tri = shapes.InfiniteTriangle(
             'color_generator': default_color_generator(
                 (255, 0, 10, 255)),
             'zoom_generator': default_zoom_generator(zoom_cycle=[1, 0.5, 1.5], periods=[25]), 
-            'alpha_angle_generator': gene(0),
+            'alpha_angle_generator': infinite_grower(step=1),
             }
         )
 
