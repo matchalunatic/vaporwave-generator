@@ -234,6 +234,9 @@ chunkperm_glitch = glitches.ChunksPermutationsGlitch(elems[0], generators={
 slightoffset_glitch = glitches.SlightOffsetGlitch(elems[0], generators={
     })
 
+wavelet_glitch = glitches.WaveletGlitch(elems[0], generators={
+    })
+
 glitches = {
 'g_phase': phase_glitch,
 'g_corruption': corruption_glitch,
@@ -241,12 +244,14 @@ glitches = {
 'g_convergence': convergence_glitch,
 'g_chunkperm': chunkperm_glitch,
 'g_slightoff': slightoffset_glitch,
+'g_wavelet': wavelet_glitch,
 }
 
 glitchelems = list(glitches[a] for a in the_args if a in glitches)
 elems += glitchelems
 
 allsprites = pygame.sprite.RenderUpdates(elems)
+print(elems)
 going = True
 
 while going:

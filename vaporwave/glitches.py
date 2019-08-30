@@ -16,6 +16,33 @@ def compose_colorarray(r, g, b, a):
     return a << 24 | g << 16 | r << 8  | b << 0
 
 
+# https://stackoverflow.com/questions/20360675/roll-rows-of-a-matrix-independently/51613442
+def indep_roll(arr, shifts, axis=1):
+    """Apply an independent roll for each dimensions of a single axis.
+
+    Parameters
+    ----------
+    arr : np.ndarray
+        Array of any shape.
+
+    shifts : np.ndarray
+        How many shifting to use for each dimension. Shape: `(arr.shape[axis],)`.
+
+    axis : int
+        Axis along which elements are shifted.
+    """
+    arr = numpy.swapaxes(arr,axis,-1)
+    all_idcs = numpy.ogrid[[slice(0,n) for n in arr.shape]]
+
+    # Convert to a positive shift
+    shifts[shifts < 0] += arr.shape[-1]
+    all_idcs[-1] = all_idcs[-1] - shifts[:, numpy.newaxis]
+
+    result = arr[tuple(all_idcs)]
+    arr = numpy.swapaxes(result,-1,axis)
+    return arr
+
+
 
 class Glitch(pygame.sprite.Sprite):
     """A Glitch sprite, bound to another sprite: it will duplicate its content
@@ -257,3 +284,31 @@ class SlightOffsetGlitch(Glitch):
         self.counter += 1
 
 
+class WaveletGlitch(Glitch):
+    """Make lines into wavelets"""
+    def __init__(self, other_sprite, generators=None):
+        self.amplitude_h = 1
+        self.amplitude_v = 10
+        # h line count for exploring all amplitudes (-a;+a)
+        self.period_h = 30
+        # v line count for exploring all amplitudes (-a;+a)
+        self.period_v = 30
+        self.permutations = []
+        super(WaveletGlitch, self).__init__(other_sprite)
+
+    def glitch(self):
+        # blank self image
+        self.image = pygame.Surface((0, 0))
+        self.rect = (0, 0)
+        # do the work
+        w, h = self.sprite_target.image.get_rect()[2:]
+        sur = pygame.surfarray.pixels2d(self.sprite_target.image)
+        # generate horizontal offsets according to line
+        col_multiplicators = [int(math.ceil(self.amplitude_h * numpy.cos(l / self.period_h * math.pi * 2))) + self.amplitude_h for l in range(len(sur[0]))]
+        line_multiplicators = [int(math.ceil(self.amplitude_v * numpy.cos(l / self.period_h * math.pi * 2))) + self.amplitude_v for l in range(len(sur))]
+        offsets_h = numpy.array(line_multiplicators)
+        offsets_v = numpy.array(col_multiplicators)
+        sur = indep_roll(sur, offsets_v, 0)
+        sur = indep_roll(sur, offsets_h, 1)
+        # blit to source sprite target
+        pygame.surfarray.blit_array(self.sprite_target.image, sur)
