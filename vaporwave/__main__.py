@@ -231,12 +231,16 @@ lp_glitch = glitches.LocalPermutationsGlitch(elems[0], generators={
 chunkperm_glitch = glitches.ChunksPermutationsGlitch(elems[0], generators={
     })
 
+slightoffset_glitch = glitches.SlightOffsetGlitch(elems[0], generators={
+    })
+
 glitches = {
 'g_phase': phase_glitch,
 'g_corruption': corruption_glitch,
 'g_localperm': lp_glitch,
 'g_convergence': convergence_glitch,
-'g_chunkperm': chunkperm_glitch
+'g_chunkperm': chunkperm_glitch,
+'g_slightoff': slightoffset_glitch,
 }
 
 glitchelems = list(glitches[a] for a in the_args if a in glitches)

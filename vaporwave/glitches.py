@@ -208,3 +208,52 @@ class ChunksPermutationsGlitch(Glitch):
             self.sprite_target.blit_array(self.sprite_target.image, sur)
         self.counter += 1
             
+
+class SlightOffsetGlitch(Glitch):
+    def __init__(self, other_sprite, generators=None):
+        self.corruption_size = (64, 64)
+        self.max_glitches = 12
+        self.change_after = 13
+        self.counter = 0
+        self.offset_left = -3
+        self.offset_top = 3
+        self.permutations = []
+        super(SlightOffsetGlitch, self).__init__(other_sprite)
+
+    def glitch(self):
+        self.image = pygame.Surface((0, 0))
+        self.rect = (0, 0)
+        w, h = self.sprite_target.image.get_rect()[2:]
+        p_w, p_h = self.corruption_size
+        sur = pygame.surfarray.pixels2d(self.sprite_target.image)
+        if self.counter % self.change_after == 0:
+            self.permutations = []
+            for _ in range(random.randint(0, self.max_glitches + 1)):
+                o_x = random.randint(abs(self.offset_left), w - p_w - 1 - abs(self.offset_left))
+                o_y = random.randint(abs(self.offset_top), h - p_h - 1 - abs(self.offset_top))
+                d_x = o_x + self.offset_left
+                d_y = o_y + self.offset_top
+                self.permutations.append((o_x, o_x + p_w,
+                                          o_y, o_y + p_h,
+                                          d_x, d_x + p_w,
+                                          d_y, d_y + p_h))
+        changed = True
+        for p in self.permutations:
+            obx, oex, oby, oey, dbx, dex, dby, dey = p
+            o_chunk = sur[obx:oex, oby:oey] #.copy()
+            d_chunk = sur[dbx:dex, dby:dey]
+            # force alpha 255
+            sur[obx:oex, oby:oey] = d_chunk
+            sur[dbx:dex, dby:dey] = o_chunk
+        else:
+            changed = False
+        if changed:
+            # hide original by setting its alpha channel to 0
+            # empty original sprite
+            # self.sprite_target.image.fill((0, 0, 0, 0))
+            # display glitched
+            # pygame.surfarray.blit_array(self.image, sur)
+            self.sprite_target.blit_array(self.sprite_target.image, sur)
+        self.counter += 1
+
+
