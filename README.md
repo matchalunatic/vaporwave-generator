@@ -11,6 +11,12 @@ slight offset, in a lo-fi or vaporwave style.
 It's my first toying with graphics programming so it's really crap for the
 moment but I hope it will get to something cool somewhere soon.
 
+## Run a scene
+
+Launch
+
+./run.sh scene path/to/scene.yml
+
 
 ## Credits
 
