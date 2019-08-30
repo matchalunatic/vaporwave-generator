@@ -1,0 +1,33 @@
+global:
+    width: 1024
+    height: 768
+    title: A d e m o      s c e n e
+    framerate: 25
+    background_color: (0, 0, 0, 255)
+
+objects:
+  stars_1:
+      type: StarField
+      base_size:  [8000, 768]
+      generators:
+        stars_count: 250
+        random_seed: 19051991
+        translation_generator: utils.translation2d_generator(start_pos=Vector2(0, 0), increment_vector=Vector2(0.1, 0), max_vector=Vector2(7000, 0))
+        color_generator: utils.default_generator((255, 255, 255, 80))
+  stars_2:
+      type: StarField
+      base_size:  [8000, 768]
+      generators:
+        stars_count: 250
+        random_seed: 230788
+        translation_generator: utils.translation2d_generator(start_pos=Vector2(0, 0), increment_vector=Vector2(1, 0), max_vector=Vector2(7000, 0))
+        color_generator: utils.default_generator((255, 255, 255, 80))
+
+
+scenes:
+    - title: Intro scene
+      comment: This is the intro scene. It is inspired by https://www.youtube.com/watch?v=pIub2PQ6hvY
+      duration: 500
+      objects:
+          - stars_1
+          - stars_2

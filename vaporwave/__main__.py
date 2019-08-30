@@ -3,6 +3,7 @@ from pygame.locals import *
 from pygame.math import Vector2, Vector3
 from . import shapes
 from . import glitches
+from . import scene_reader
 from .utils import *
 import logging
 import sys
@@ -13,6 +14,13 @@ import os
 FRAME_RATE=int(os.environ.get("FR", 25))
 
 the_args = sys.argv[1:]
+
+if the_args[0].upper() == 'SCENE':
+    print("scene mode")
+    scene_f = the_args[1]
+    sr = scene_reader.SceneReader(scene_f)
+    sys.exit(0)
+
 
 sinw = lambda: sin_wave_angular_speed_generator(mul=60, speed=1, baseline=0.5)
 
@@ -196,6 +204,13 @@ arwing = shapes.ObjSprite3D(file_path='assets/arwing.obj', base_size=None, gener
     }
 )
 
+starfield = shapes.StarField(base_size=(8000, 900), generators={
+    'color_generator': default_color_generator(
+        (255, 255, 255, 80)),
+    'translation_generator': translation2d_generator(start_pos=Vector2(0, 0), increment_vector=Vector2(0.1, 0), max_vector=Vector2(7000, 0)),
+})
+starfield.rect.center = MIDDLE_MIDDLE
+
 names = {
 'tri': tri,
 'tri2': tri2,
@@ -204,6 +219,7 @@ names = {
 'grid2': grid2,
 'groove': groove,
 'arwing': arwing,
+'stars': starfield,
         }
 
 elems = list(names[a] for a in the_args if a in names)
@@ -254,6 +270,8 @@ allsprites = pygame.sprite.RenderUpdates(elems)
 print(elems)
 going = True
 
+draw_over = False
+
 while going:
     clock.tick(FRAME_RATE)
     for event in pygame.event.get():
@@ -261,10 +279,16 @@ while going:
             going = False
         elif event.type == KEYDOWN and event.key == K_ESCAPE:
             going = False
+        elif event.type == KEYDOWN and event.key == K_n:
+            allsprites.empty()
+            print("emptied")
+        elif event.type == KEYDOWN and event.key == K_u:
+            draw_over = not draw_over
 
 #
     allsprites.update()
-    screen.blit(background, (0, 0))
+    if not draw_over:
+        screen.blit(background, (0, 0))
 
     allsprites.draw(screen)
     pygame.display.update()

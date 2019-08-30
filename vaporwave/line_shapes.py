@@ -1,5 +1,5 @@
 from .geom_base import *
-
+from random import Random
 
 class LineSprite(GeometrySprite):
     """Base class for line-based sprites"""
@@ -60,6 +60,50 @@ class Grid(LineSprite):
         self.spacing_x = next(self.spacing_x_generator)
         self.spacing_y = next(self.spacing_y_generator)
         super(Grid, self).update()
+
+class StarField(LineSprite):
+    """A collection of a generated starfield. Each star is a 3-px cross.
+    """
+
+    def __init__(self, base_size=None, generators=None):
+        random_seed = generators.pop('random_seed', 2307198819051991)
+        stars_count = generators.pop('stars_count', 250)
+        self.stars_count = stars_count
+        self.random = Random(random_seed)
+        self.starfield = []
+        super(StarField, self).__init__(base_size, generators)
+        self.build_starfield()
+
+    def build_starfield(self):
+        starfield = []
+        w, h = self.base_size
+        r = self.random
+        for i in range(self.stars_count):
+            x, y = r.randint(1, w-1), r.randint(1, h-1)
+            starfield.append((x, y))
+        self.starfield = starfield
+
+    def prepare_basic_shape(self):
+        """Run just as needed"""
+        if not self.starfield:
+            self.points = []
+            return
+        if self.points:
+            return self.points
+
+        for x, y in self.starfield:
+            # horizontal axis
+            self.points.append([
+                Vector2(x - 1, y),
+                Vector2(x + 1, y),
+            ])
+            # vertical axis
+            self.points.append(
+            [
+                Vector2(x, y - 1),
+                Vector2(x, y + 1),
+            ])
+        return self.points
 
 
 class Grid3D(Grid):

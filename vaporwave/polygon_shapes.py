@@ -89,6 +89,8 @@ class InfiniteTriangle3D(InfiniteTriangle):
 
 
 
+
+
 class ObjSprite3D(PolygonSprite):
     """Load basic obj files
 

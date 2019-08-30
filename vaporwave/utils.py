@@ -95,6 +95,10 @@ def default_number_generator(num=10):
     while True:
         yield num
 
+def default_generator(val=None):
+    while True:
+        yield val
+
 
 def tuple_minimal_total(minimum_value, a_tuple, intify=True, max_value=255):
     total = sum(a_tuple)
@@ -484,6 +488,23 @@ def camera_generator(start_pos=Vector3(0, 0, 0), increment_vector=Vector3(0, 0, 
             start_pos[1] = initial_y
         if min_z is not None and start_pos[2] < min_z:
             start_pos[2] = initial_z 
+
+
+def translation2d_generator(start_pos=Vector2(0, 0), increment_vector=Vector2(0, 0), min_vector=None, max_vector=None):
+    """
+    
+    
+        This is lazy as it will reset all coordinates if you go out of bound
+        on a single coordinate.
+    """
+    v = start_pos
+    while True:
+        yield v
+        v += increment_vector
+        if min_vector is not None and any(min_vector[i] > v[i] for i in (0, 1)):
+            v = min_vector
+        if max_vector is not None and any(max_vector[i] < v[i] for i in (0, 1)):
+            v = max_vector
 
 
 
