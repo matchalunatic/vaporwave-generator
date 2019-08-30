@@ -35,7 +35,7 @@ class SceneReader(object):
 
     def parse_scene(self):
         with open(self.scene_path, 'r') as fh:
-            data = yaml.load(fh)
+            data = yaml.load(fh, Loader=yaml.SafeLoader)
         self.data = data
         # parse global: section
         global_d = data.get('global', {})
