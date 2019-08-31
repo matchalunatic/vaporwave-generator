@@ -8,9 +8,22 @@ This is a framework for elaborating on this.
 This is my toy project and something I use to learn about graphics.
 
 This is python.
-This is an homage to the super cool and chill videos made by Switched On SNES
+This is an homage to the super cool and chill videos made by Switched On SNES.
 
 This is a tribute to the world of analog synths.
+
+# Design
+
+All objects are driven by generators (functions that yield values).
+
+At each clock tick the generators are asked for a new value and the objects
+vary accordingly.
+
+This allows for various data sources: mathematical functions, user interaction,
+randomness, music properties...
+
+Some effects have hardcoded values: this is often temporary or because the
+effect only makes sense with these values.
 
 # Plans
 
