@@ -40,10 +40,17 @@ objects:
           zoom_generator: utils.default_generator(4)
           color_generator: utils.default_generator((255, 255, 255, 200))
           background: utils.default_generator(None)
-          text: utils.iterable_stutterer(utils.typewriter_iterator('a demo text for your convenience', True), stutter=10)
+          text: utils.iterable_stutterer(utils.typewriter_iterator('a demo text for your convenience', True), stutter=3)
+          rect: utils.default_generator(dict(center=(1280/2, 720/2)))
+
+effects:
+    stars_1_wavelet:
+        type: WaveletGlitch
+        target: stars_1
+        generators: {}
 
 
-      
+
 scenes:
     - title: Intro scene
       comment: This is the intro scene. It is inspired by https://www.youtube.com/watch?v=pIub2PQ6hvY
@@ -60,6 +67,8 @@ scenes:
           - stars_2
           - triangles_1
           - som_text
+      effects:
+          - stars_1_wavelet
       music: assets/switched-on-snes.flac
     - title: Tri only
       comment: Triangle only

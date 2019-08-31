@@ -13,7 +13,7 @@ from collections import namedtuple
 
 from . import utils
 from . import shapes
-from . import glitches
+from . import glitches as effects
 
 
 
@@ -24,7 +24,7 @@ from pygame.math import Vector2, Vector3
 
 logger = logging.getLogger(__name__)
 
-Scene = namedtuple("Scene", 'title duration objects music')
+Scene = namedtuple("Scene", 'title duration objects effects music')
 
 class SceneReader(object):
     def __init__(self, scene_path):
@@ -56,6 +56,7 @@ class SceneReader(object):
 
     def populate_scene(self):
         self.objects = {}
+        self.effects = {}
         self.scenes = []
         self.scene_counter = 0
         data = self.data
@@ -73,13 +74,27 @@ class SceneReader(object):
 
             obj = eval(evalstr, globals(), locals())
             self.objects[objname] = obj
+        feffects = data.get('effects', {})
+        for objname, objdata in feffects.items():
+            o_type = objdata.get('type', None)
+            generators = objdata.get('generators', {})
+            target_s = objdata.get('target', None)
+            target = self.objects[target_s]
+            if o_type not in dir(effects):
+                raise RuntimeError("I do not know effect " + o_type)
+            evalstr = "effects.{o_type}(other_sprite=target, generators=generators)".format(o_type=o_type)
+        
+            obj = eval(evalstr, globals(), locals())
+            self.effects[objname] = obj
         for scene in data.get('scenes', []):
             title = scene.get('title', None)
             duration = scene.get('duration', 0)
             music = scene.get('music', None)
-            scene_objlist = scene.get('objects')
+            scene_objlist = scene.get('objects', [])
+            scene_efflist = scene.get('effects', [])
             scene_objs = tuple([self.objects[a] for a in scene_objlist])
-            self.scenes.append(Scene(title=title, duration=duration, objects=scene_objs, music=music))
+            scene_effects = tuple([self.effects[a] for a in scene_efflist])
+            self.scenes.append(Scene(title=title, duration=duration, objects=scene_objs, effects=scene_effects, music=music))
 
 
     def parse_generators(self, generators):
@@ -94,6 +109,7 @@ class SceneReader(object):
             cursc = self.scenes[self.scene_counter]
             logger.info("next scene: %s", cursc.title)
             self.current_stage.add(*cursc.objects)
+            self.current_stage.add(*cursc.effects)
             self.scene_counter += 1
             self.scene_title = cursc.title
             self.background_music = cursc.music

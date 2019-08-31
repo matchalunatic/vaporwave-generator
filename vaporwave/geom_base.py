@@ -159,9 +159,8 @@ class PipelinedSprite(pygame.sprite.Sprite):
         zoom_generator = generators.pop('zoom_generator', None)
         translation_generator = generators.pop('translation_generator', None)
         alpha_generator = generators.pop('alpha_generator', None)
-        alpha_angle_generator = generators.pop(
-            'alpha_angle_generator', None)
-
+        alpha_angle_generator = generators.pop('alpha_angle_generator', None)
+        rect_generator = generators.pop('rect', None)
 
         if color_generator is None:
             color_generator = default_color_generator()
@@ -175,11 +174,14 @@ class PipelinedSprite(pygame.sprite.Sprite):
             alpha_generator = default_alpha_generator()
         if alpha_angle_generator is None:
             alpha_angle_generator = default_number_generator(0)
+        if rect_generator is None:
+            rect_generator = default_generator(None)
         self.color_generator = color_generator
         self.stroke_width_generator = stroke_width_generator
         self.zoom_generator = zoom_generator
         self.translation_generator = translation_generator
         self.alpha_generator = alpha_generator
+        self.rect_generator = rect_generator
 
         self.alpha_angle_generator = alpha_angle_generator
 
@@ -254,6 +256,9 @@ class PipelinedSprite(pygame.sprite.Sprite):
             self.stroke_width = next(self.stroke_width_generator)
         self.draw_surface()
         self.update_position()
+        wanted_rect = next(self.rect_generator)
+        if wanted_rect is not None:
+            self.rect = self.image.get_rect(**wanted_rect)
 
     def update_position(self):
         return
