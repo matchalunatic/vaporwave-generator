@@ -131,8 +131,136 @@ def transformation_projection_offset(object, points):
     # print(getminmax_xy(out))
     return out
 
+class PipelinedSprite(pygame.sprite.Sprite):
+    """Base class for all vaporwave-generator sprites
+    
+    """
+    def build_surface_workflow(self):
+        """Set all surfaces transformations"""
+        self.surface_workflow = []
 
-class GeometrySprite(pygame.sprite.Sprite):
+
+    def build_transform_workflow(self):
+        self.transform_workflow = []
+
+    def draw_surface(self):
+        """Apply surface transformations"""
+        for t in self.surface_workflow:
+            self.image = t(self.image)
+        self.rect = self.image.get_rect()
+        # restore alpha channel
+        self.image.convert_alpha()
+
+
+    def populate_generators(self, generators):
+        base_size = self.base_w, self.base_h
+        color_generator = generators.pop('color_generator', None)
+        stroke_width_generator = generators.pop('stroke_width_generator', None)
+        zoom_generator = generators.pop('zoom_generator', None)
+        translation_generator = generators.pop('translation_generator', None)
+        alpha_generator = generators.pop('alpha_generator', None)
+        alpha_angle_generator = generators.pop(
+            'alpha_angle_generator', None)
+
+
+        if color_generator is None:
+            color_generator = default_color_generator()
+        if stroke_width_generator is None:
+            stroke_width_generator = default_width_generator()
+        if zoom_generator is None:
+            zoom_generator = default_zoom_generator()
+        if translation_generator is None:
+            translation_generator = default_number_generator(Vector2(0, 0))
+        if alpha_generator is None:
+            alpha_generator = default_alpha_generator()
+        if alpha_angle_generator is None:
+            alpha_angle_generator = default_number_generator(0)
+        self.color_generator = color_generator
+        self.stroke_width_generator = stroke_width_generator
+        self.zoom_generator = zoom_generator
+        self.translation_generator = translation_generator
+        self.alpha_generator = alpha_generator
+
+        self.alpha_angle_generator = alpha_angle_generator
+
+    def __init__(self, base_size, generators=None):
+        """Initialize a PipelinedSprite"""
+        if generators is None:
+            generators = {}
+        
+        screen = pygame.display.get_surface()
+        screen_size = scrw, scrh = screen.get_size()
+        
+        # if True: generate next color at each draw
+        # otherwise: generate next color at each update
+        self.color_per_draw = True
+        # if True: generate next stroke width at each draw
+        # otherwise: generate next stroke width at each update
+        self.stroke_width_per_draw = False
+
+        self.screen_size = screen_size
+        base_w, base_h = base_size
+
+        # these sizes should never be mutated
+        self.base_w = base_w
+        self.base_h = base_h
+        
+
+        # base color and stroke width
+
+        self.populate_generators(generators)
+        self.build_transform_workflow()
+        self.build_surface_workflow()
+
+        # populate basic properties
+        self.color = next(self.color_generator)
+        self.stroke_width = next(self.stroke_width_generator)
+
+
+        if len(generators) > 0:
+            logger.warning("Unhandled generators: %s", generators.keys())
+            raise RuntimeError("Some generators remain unhandled")
+
+        self.rect = DummyRect()
+        self.keep_centered = False
+
+        self.debug = False
+        self.update()
+        super(PipelinedSprite, self).__init__()
+
+    def get_geometry(self):
+        """return act_w, act_h, maxlen_x, maxlen_y, center"""
+        act_w, act_h = self.zoom * self.base_w, self.zoom * self.base_h
+        maxlen_x = act_w# math.sqrt(act_w**2 + act_h**2)
+        maxlen_y = act_h# maxlen_x
+
+        maxlen_x, maxlen_y = min(maxlen_x, self.screen_size[0]), min(
+            maxlen_y, self.screen_size[1])
+
+        s_w, s_h  = self.screen_size
+        # center = (maxlen_x // 2, maxlen_y // 2)
+        center = Vector2(s_w / 2, s_h / 2)
+        return act_w, act_h, maxlen_x, maxlen_y, center
+
+    def update(self):
+        super(PipelinedSprite, self).update()
+        self.zoom = next(self.zoom_generator)
+        self.translation = next(self.translation_generator)
+        self.alpha = next(self.alpha_generator)
+        self.alpha_angle = next(self.alpha_angle_generator)
+        if not self.color_per_draw:
+            self.color = next(self.color_generator)
+        if not self.stroke_width_per_draw:
+            self.stroke_width = next(self.stroke_width_generator)
+        self.draw_surface()
+        self.update_position()
+
+    def update_position(self):
+        return
+        self.rect.left = 0
+        self.rect.top = 0
+
+class GeometrySprite(PipelinedSprite):
     """Base class for all geometry based sprites
     
     
@@ -158,29 +286,9 @@ class GeometrySprite(pygame.sprite.Sprite):
         """helper to get a base_size tuple"""
         return self.base_w, self.base_h
 
-    def __init__(self, base_size, generators=None):
-        """Initialize a GeometrySprite"""
-        if generators is None:
-            generators = {}
-        
-        screen = pygame.display.get_surface()
-        screen_size = scrw, scrh = screen.get_size()
-        
-        # if True: generate next color at each draw
-        # otherwise: generate next color at each update
-        self.color_per_draw = True
-        # if True: generate next stroke width at each draw
-        # otherwise: generate next stroke width at each update
-        self.stroke_width_per_draw = False
-
-        color_generator = generators.pop('color_generator', None)
-        width_generator = generators.pop('width_generator', None)
-        stroke_width_generator = generators.pop('stroke_width_generator', None)
-        zoom_generator = generators.pop('zoom_generator', None)
-        translation_generator = generators.pop('translation_generator', None)
-        alpha_generator = generators.pop('alpha_generator', None)
-        alpha_angle_generator = generators.pop(
-            'alpha_angle_generator', None)
+    def populate_generators(self, generators):
+        scrw, scrh = self.screen_size
+        base_size = self.base_w, self.base_h
         beta_angle_generator = generators.pop(
             'beta_angle_generator', None)
         gamma_angle_generator = generators.pop(
@@ -196,21 +304,7 @@ class GeometrySprite(pygame.sprite.Sprite):
         cam_aspect_ratio_generator = generators.pop(
             'cam_aspect_ratio_generator', None)
 
-        if base_size == None:
-            base_size = screen_size
 
-        if color_generator is None:
-            color_generator = default_color_generator()
-        if stroke_width_generator is None:
-            stroke_width_generator = default_width_generator()
-        if zoom_generator is None:
-            zoom_generator = default_zoom_generator()
-        if translation_generator is None:
-            translation_generator = default_number_generator(Vector2(0, 0))
-        if alpha_generator is None:
-            alpha_generator = default_alpha_generator()
-        if alpha_angle_generator is None:
-            alpha_angle_generator = default_number_generator(0)
         if beta_angle_generator is None:
             beta_angle_generator = default_number_generator(0)
         if gamma_angle_generator is None:
@@ -219,6 +313,7 @@ class GeometrySprite(pygame.sprite.Sprite):
             center3D = Vector3(scrw // 2, scrh // 2, 0)
             center3d_generator = default_number_generator(center3D)
         if cam_screen_generator is None:
+            print(base_size)
             cam_screen = Vector3(0, 0, max(base_size))
             cam_screen_generator = default_number_generator(cam_screen)
         if cam_center_generator is None:
@@ -230,13 +325,7 @@ class GeometrySprite(pygame.sprite.Sprite):
         if cam_aspect_ratio_generator is None:
             cam_aspect_ratio = 1
             cam_aspect_ratio_generator = default_number_generator(cam_aspect_ratio)
-        self.color_generator = color_generator
-        self.stroke_width_generator = stroke_width_generator
-        self.zoom_generator = zoom_generator
-        self.translation_generator = translation_generator
-        self.alpha_generator = alpha_generator
 
-        self.alpha_angle_generator = alpha_angle_generator
         self.beta_angle_generator = beta_angle_generator
         self.gamma_angle_generator = gamma_angle_generator
         self.center3d_generator = center3d_generator
@@ -244,26 +333,7 @@ class GeometrySprite(pygame.sprite.Sprite):
         self.cam_center_generator = cam_center_generator
         self.cam_angle_generator = cam_angle_generator
         self.cam_aspect_ratio_generator = cam_aspect_ratio_generator
-
-        self.build_transform_workflow()
-
-        self.screen_size = screen_size
-        base_w, base_h = base_size
-
-        # these sizes should never be mutated
-        self.base_w = base_w
-        self.base_h = base_h
-        
-        if len(generators) > 0:
-            logger.warning("Unhandled generators: %s", generators.keys())
-            raise RuntimeError("Some generators remain unhandled")
-
-        self.rect = DummyRect()
-        self.keep_centered = False
-
-        self.debug = False
-        super(GeometrySprite, self).__init__()
-        self.update()
+        return super(GeometrySprite, self).populate_generators(generators)
 
     def build_transform_workflow(self):
         self.transform_workflow = [
@@ -272,20 +342,6 @@ class GeometrySprite(pygame.sprite.Sprite):
             transformation_zoom,
             transformation_projection_offset,
                 ]
-
-    def get_geometry(self):
-        """return act_w, act_h, maxlen_x, maxlen_y, center"""
-        act_w, act_h = self.zoom * self.base_w, self.zoom * self.base_h
-        maxlen_x = act_w# math.sqrt(act_w**2 + act_h**2)
-        maxlen_y = act_h# maxlen_x
-
-        maxlen_x, maxlen_y = min(maxlen_x, self.screen_size[0]), min(
-            maxlen_y, self.screen_size[1])
-
-        s_w, s_h  = self.screen_size
-        # center = (maxlen_x // 2, maxlen_y // 2)
-        center = Vector2(s_w / 2, s_h / 2)
-        return act_w, act_h, maxlen_x, maxlen_y, center
 
     def generate_points(self, points):
         """override this and populate a structured collection of points
@@ -342,18 +398,12 @@ class GeometrySprite(pygame.sprite.Sprite):
                 logger.error("Drawing error:\n%s", traceback.format_exc())
                 logger.error("Parameters: surface %s color %s stroke_width %s drawable %s", surface, self.color, self.stroke_width, drawable)
                 raise
-        surface.convert()
         self.oldrect = self.rect
         self.image, self.rect = surface, surface.get_rect()
-        # should I really do this?? probably this is a safe default
-        # self.rect.center = self.oldrect.center
+        # now call parent which will apply direct surface transforms
+        super(GeometrySprite, self).draw_surface()
         
     def update(self):
-        super(GeometrySprite, self).update()
-        self.zoom = next(self.zoom_generator)
-        self.translation = next(self.translation_generator)
-        self.alpha = next(self.alpha_generator)
-        self.alpha_angle = next(self.alpha_angle_generator)
         self.beta_angle = next(self.beta_angle_generator)
         self.gamma_angle = next(self.gamma_angle_generator)
         self.center3d = next(self.center3d_generator)
@@ -361,14 +411,4 @@ class GeometrySprite(pygame.sprite.Sprite):
         self.cam_screen = next(self.cam_screen_generator)
         self.cam_center = next(self.cam_center_generator)
         self.cam_aspect_ratio = next(self.cam_aspect_ratio_generator)
-        if not self.color_per_draw:
-            self.color = next(self.color_generator)
-        if not self.stroke_width_per_draw:
-            self.stroke_width = next(self.stroke_width_generator)
-        self.draw_surface()
-        self.update_position()
-
-    def update_position(self):
-        return
-        self.rect.left = 0
-        self.rect.top = 0
+        super(GeometrySprite, self).update()

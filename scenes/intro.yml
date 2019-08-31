@@ -28,10 +28,20 @@ objects:
       generators:
           min_w: 1
           num_triangles: 5
-          width_generator: utils.default_generator(2)
+          stroke_width_generator: utils.default_generator(2)
           color_generator: utils.default_generator((255, 255, 255, 120))
           alpha_angle_generator: utils.iterable_stutterer(utils.infinite_grower(step=-5), stutter=5)
-          zoom_generator: utils.iterable_stutterer(utils.series_generator(series=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.2, 1.4, 2.0, 2.0, 2.0, 8], lastItem=8), stutter=5)
+          zoom_generator: utils.iterable_stutterer(utils.series_generator(series=[0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.2, 1.4, 2.0, 2.0, 2.0, 8], lastItem=8), stutter=5)
+  som_text:
+      type: TextSprite
+      base_size: [800, 300]
+      generators:
+          font: utils.default_generator(('freesansbold.ttf', 16))
+          zoom_generator: utils.default_generator(4)
+          color_generator: utils.default_generator((255, 255, 255, 200))
+          background: utils.default_generator(None)
+          text: utils.iterable_stutterer(utils.typewriter_iterator('a demo text for your convenience', True), stutter=10)
+
 
       
 scenes:
@@ -49,6 +59,7 @@ scenes:
           - stars_1
           - stars_2
           - triangles_1
+          - som_text
       music: assets/switched-on-snes.flac
     - title: Tri only
       comment: Triangle only

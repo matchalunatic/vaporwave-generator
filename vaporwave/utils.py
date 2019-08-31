@@ -542,6 +542,19 @@ def getminmax_xyz(points):
             )
 
 
+def typewriter_iterator(text, remain=False):
+    s = ''
+    while True:
+        s = ''
+        for t in text:
+            s += t
+            yield s
+        if remain:
+            break
+    while True:
+        yield s
+
+
 # debug util
 def getminmax_xy(points):
     return (min(a[0] for a in points),

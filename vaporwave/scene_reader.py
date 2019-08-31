@@ -22,6 +22,8 @@ from pygame.locals import *
 from pygame.math import Vector2, Vector3
 
 
+logger = logging.getLogger(__name__)
+
 Scene = namedtuple("Scene", 'title duration objects music')
 
 class SceneReader(object):
@@ -90,6 +92,7 @@ class SceneReader(object):
         if len(self.scenes) > self.scene_counter:
             self.current_stage.empty()
             cursc = self.scenes[self.scene_counter]
+            logger.info("next scene: %s", cursc.title)
             self.current_stage.add(*cursc.objects)
             self.scene_counter += 1
             self.scene_title = cursc.title
@@ -111,10 +114,8 @@ class SceneReader(object):
 
 
     def update_music(self):
-        print("hey music", self.background_music)
         if self.background_music == self._playing_music:
             return
-        print("pygame music stuff")
         pygame.mixer.music.set_volume(0.2)
         pygame.mixer.music.load(self.background_music)
         pygame.mixer.music.play()
@@ -139,7 +140,6 @@ class SceneReader(object):
                 elif event.type == KEYDOWN and event.key == K_ESCAPE:
                     self.going = False
                 elif event.type == KEYDOWN and event.key == K_n:
-                    print("next scene")
                     self.load_next_scene()
                 elif event.type == KEYDOWN and event.key == K_u:
                     draw_over = not draw_over

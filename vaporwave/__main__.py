@@ -12,6 +12,7 @@ import os
 
 
 FRAME_RATE=int(os.environ.get("FR", 25))
+logging.basicConfig(level=logging.DEBUG)
 
 the_args = sys.argv[1:]
 
@@ -29,7 +30,6 @@ halfer = lambda x: list(a/2 for a in x)
 gene = lambda x: default_number_generator(x)
 v2tov3 = lambda x: Vector3(x[0], x[1], 0)
 
-logging.basicConfig(level=logging.DEBUG)
 
 GRAY = (30, 30, 30)
 SCREEN_SIZE = (1200, 900)
