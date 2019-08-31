@@ -22,8 +22,8 @@ class Grid(LineSprite):
         if generators is None:
             generators = {}
 
-        spacing_x_generator = generators.pop('spacing_x_generator', None)
-        spacing_y_generator = generators.pop('spacing_y_generator', None)
+        spacing_x_generator = generators.pop('spacing_x', None)
+        spacing_y_generator = generators.pop('spacing_y', None)
         if spacing_y_generator is None:
             spacing_y_generator = default_spacing_generator(10)
         if spacing_x_generator is None:

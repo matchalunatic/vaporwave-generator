@@ -31,8 +31,8 @@ class ArcSprite(GeometrySprite):
 class SingleGroove(ArcSprite):
 
     def __init__(self, base_size, generators=None):
-        amplitude_start_generator = generators.pop('amplitude_start_generator', None)
-        amplitude_end_generator = generators.pop('amplitude_end_generator', None)
+        amplitude_start_generator = generators.pop('amplitude_start', None)
+        amplitude_end_generator = generators.pop('amplitude_end', None)
         if amplitude_start_generator is None:
             amplitude_start_generator = default_number_generator(0)
         if amplitude_end_generator is None:

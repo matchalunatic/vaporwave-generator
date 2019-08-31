@@ -154,12 +154,12 @@ class PipelinedSprite(pygame.sprite.Sprite):
 
     def populate_generators(self, generators):
         base_size = self.base_w, self.base_h
-        color_generator = generators.pop('color_generator', None)
-        stroke_width_generator = generators.pop('stroke_width_generator', None)
-        zoom_generator = generators.pop('zoom_generator', None)
-        translation_generator = generators.pop('translation_generator', None)
-        alpha_generator = generators.pop('alpha_generator', None)
-        alpha_angle_generator = generators.pop('alpha_angle_generator', None)
+        color_generator = generators.pop('color', None)
+        stroke_width_generator = generators.pop('stroke_width', None)
+        zoom_generator = generators.pop('zoom', None)
+        translation_generator = generators.pop('translation', None)
+        alpha_generator = generators.pop('alpha', None)
+        alpha_angle_generator = generators.pop('alpha_angle', None)
         rect_generator = generators.pop('rect', None)
 
         if color_generator is None:
@@ -295,19 +295,19 @@ class GeometrySprite(PipelinedSprite):
         scrw, scrh = self.screen_size
         base_size = self.base_w, self.base_h
         beta_angle_generator = generators.pop(
-            'beta_angle_generator', None)
+            'beta_angle', None)
         gamma_angle_generator = generators.pop(
-            'gamma_angle_generator', None)
+            'gamma_angle', None)
         center3d_generator = generators.pop(
-            'center3d_generator', None)
+            'center3d', None)
         cam_screen_generator = generators.pop(
-            'cam_screen_generator', None)
+            'cam_screen', None)
         cam_center_generator = generators.pop(
-            'cam_center_generator', None)
+            'cam_center', None)
         cam_angle_generator = generators.pop(
-            'cam_angle_generator', None)
+            'cam_angle', None)
         cam_aspect_ratio_generator = generators.pop(
-            'cam_aspect_ratio_generator', None)
+            'cam_aspect_ratio', None)
 
 
         if beta_angle_generator is None:

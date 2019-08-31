@@ -12,33 +12,33 @@ objects:
       generators:
         stars_count: 250
         random_seed: 19051991
-        translation_generator: utils.translation2d_generator(start_pos=Vector2(0, 0), increment_vector=Vector2(0.1, 0), max_vector=Vector2(7000, 0))
-        color_generator: utils.default_generator((255, 255, 255, 80))
+        translation: utils.translation2d_generator(start_pos=Vector2(0, 0), increment_vector=Vector2(0.1, 0), max_vector=Vector2(7000, 0))
+        color: utils.default_generator((255, 255, 255, 80))
   stars_2:
       type: StarField
       base_size:  [8000, 768]
       generators:
         stars_count: 250
         random_seed: 230788
-        translation_generator: utils.translation2d_generator(start_pos=Vector2(0, 0), increment_vector=Vector2(1, 0), max_vector=Vector2(7000, 0))
-        color_generator: utils.default_generator((255, 255, 255, 80))
+        translation: utils.translation2d_generator(start_pos=Vector2(0, 0), increment_vector=Vector2(1, 0), max_vector=Vector2(7000, 0))
+        color: utils.default_generator((255, 255, 255, 80))
   triangles_1:
       type: InfiniteTriangle
       base_size: [400, 300]
       generators:
           min_w: 1
           num_triangles: 5
-          stroke_width_generator: utils.default_generator(2)
-          color_generator: utils.default_generator((255, 255, 255, 120))
-          alpha_angle_generator: utils.iterable_stutterer(utils.infinite_grower(step=-5), stutter=5)
-          zoom_generator: utils.iterable_stutterer(utils.series_generator(series=[0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.2, 1.4, 2.0, 2.0, 2.0, 8], lastItem=8), stutter=5)
+          stroke_width: utils.default_generator(2)
+          color: utils.default_generator((255, 255, 255, 120))
+          alpha_angle: utils.iterable_stutterer(utils.infinite_grower(step=-5), stutter=5)
+          zoom: utils.iterable_stutterer(utils.series_generator(series=[0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.2, 1.4, 2.0, 2.0, 2.0, 8], lastItem=8), stutter=5)
   som_text:
       type: TextSprite
       base_size: [800, 300]
       generators:
           font: utils.default_generator(('freesansbold.ttf', 16))
-          zoom_generator: utils.default_generator(4)
-          color_generator: utils.default_generator((255, 255, 255, 200))
+          zoom: utils.default_generator(4)
+          color: utils.default_generator((255, 255, 255, 200))
           background: utils.default_generator(None)
           text: utils.iterable_stutterer(utils.typewriter_iterator('a demo text for your convenience', True), stutter=3)
           rect: utils.default_generator(dict(center=(1280/2, 720/2)))

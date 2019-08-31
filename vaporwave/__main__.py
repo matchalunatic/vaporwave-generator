@@ -103,10 +103,10 @@ tri = shapes.InfiniteTriangle(
         base_size=TRIANGLE_SIZE,
         num_triangles=7,
         generators={
-            'color_generator': default_color_generator(
+            'color': default_color_generator(
                 (255, 0, 10, 255)),
-            'zoom_generator': default_zoom_generator(zoom_cycle=[1, 0.5, 1.5], periods=[25]), 
-            'alpha_angle_generator': infinite_grower(step=1),
+            'zoom': default_zoom_generator(zoom_cycle=[1, 0.5, 1.5], periods=[25]), 
+            'alpha_angle': infinite_grower(step=1),
             }
         )
 
@@ -117,29 +117,29 @@ tx, ty = TRIANGLE_SIZE_2
 tri2 = shapes.InfiniteTriangle3D(
         base_size=TRIANGLE_SIZE_2, num_triangles=17,
         generators={
-            'center3d_generator': gene(Vector3(tx/2, ty/2, 0)),
-            'color_generator': default_color_generator(color=COLOR_GREEN),
-            'zoom_generator': gene(2),
-            'alpha_angle_generator': infinite_grower(step=-1),
-            'beta_angle_generator': gene(0), # shapes.infinite_grower(step=-1),
-            'gamma_angle_generator': gene(0),
-            'cam_center_generator': gene(Vector3(tx/2, 0, -450)), 
-            'cam_angle_generator': NULL_V3_GEN,
-            'cam_screen_generator': gene(Vector3(tx/2, 0, 450)), # shapes.camera_generator(Vector3(0, 0, 1), Vector3(0, 0, 50), max_z=2000), #gene(Vector3(0, 0, 200)),
-            'cam_aspect_ratio_generator': gene(1), 
-            'translation_generator': NULL_V3_GEN,
+            'center3d': gene(Vector3(tx/2, ty/2, 0)),
+            'color': default_color_generator(color=COLOR_GREEN),
+            'zoom': gene(2),
+            'alpha_angle': infinite_grower(step=-1),
+            'beta_angle': gene(0), # shapes.infinite_grower(step=-1),
+            'gamma_angle': gene(0),
+            'cam_center': gene(Vector3(tx/2, 0, -450)), 
+            'cam_angle': NULL_V3_GEN,
+            'cam_screen': gene(Vector3(tx/2, 0, 450)), # shapes.camera_generator(Vector3(0, 0, 1), Vector3(0, 0, 50), max_z=2000), #gene(Vector3(0, 0, 200)),
+            'cam_aspect_ratio': gene(1), 
+            'translation': NULL_V3_GEN,
             }
         )
 tri2.rect.center = screen.get_rect().center
 # tri2.rect.bottom = screen.get_rect().bottom
 
 grid = shapes.Grid(base_size=GRID_SIZE, generators={
-    'color_generator': advanced_color_generator(r_gen=gene(255), a_gen=gene(60), change_after=10),
-    'zoom_generator': default_zoom_generator(zoom_cycle=[1, 0.5, 1.5, 2, 3, 0.1, ], periods=[FRAME_RATE]), 
-    # 'zoom_generator': gene(1),
-    'spacing_x_generator': sin_wave_angular_speed_generator(baseline=15, mul=1),
-    'spacing_y_generator': cos_wave_angular_speed_generator(baseline=15, mul=1),
-    'translation_generator': gene(UNITX_V2*0 + UNITY_V2*0),
+    'color': advanced_color_generator(r_gen=gene(255), a_gen=gene(60), change_after=10),
+    'zoom': default_zoom_generator(zoom_cycle=[1, 0.5, 1.5, 2, 3, 0.1, ], periods=[FRAME_RATE]), 
+    # 'zoom': gene(1),
+    'spacing_x': sin_wave_angular_speed_generator(baseline=15, mul=1),
+    'spacing_y': cos_wave_angular_speed_generator(baseline=15, mul=1),
+    'translation': gene(UNITX_V2*0 + UNITY_V2*0),
 },
 )
 
@@ -147,11 +147,11 @@ grid.rect.center = MIDDLE_MIDDLE
 grid.debug = False
 
 square = shapes.Square(base_size=SQUARE_SIZE, generators={
-    'color_generator': advanced_color_generator(r_gen=gene(255), a_gen=gene(60), change_after=10),
-    'zoom_generator': default_zoom_generator(zoom_cycle=[1, 0.5, 1.5, 2, 3, 0.1, ], periods=[FRAME_RATE]), 
-    # 'zoom_generator': gene(3),
-    #'translation_generator': gene(UNITX_V2*0 + UNITY_V2*0),
-    'stroke_width_generator': gene(2)
+    'color': advanced_color_generator(r_gen=gene(255), a_gen=gene(60), change_after=10),
+    'zoom': default_zoom_generator(zoom_cycle=[1, 0.5, 1.5, 2, 3, 0.1, ], periods=[FRAME_RATE]), 
+    # 'zoom': gene(3),
+    #'translation': gene(UNITX_V2*0 + UNITY_V2*0),
+    'stroke_width': gene(2)
 },
 )
 
@@ -159,18 +159,18 @@ square.rect.center = MIDDLE_MIDDLE
 square.debug = False
 
 grid2 = shapes.Grid3D(base_size=(300, 1200), generators={
-    'color_generator': advanced_color_generator(r_gen=gene(230), a_gen=gene(128), change_after=1),
-#    'color_generator': gene((255, 255, 255, 255)),
-    'zoom_generator': gene(1),
-    'alpha_angle_generator': gene(0),
-    'spacing_x_generator': gene(30),
-    'spacing_y_generator': gene(30),
-    'translation_generator': gene(Vector3(450, -600, 0)),
-#    'cam_center_generator': gene(Vector3(600, 600, -100)),
-    'cam_center_generator': camera_generator(Vector3(600, 600, -50), increment_vector=Vector3(0, -1, 0), min_y=300),
-    'cam_angle_generator': gene(Vector3(math.pi/9, 0, 0)),
-    'cam_screen_generator': gene(Vector3(0, 300, 200)),
-    'center3d_generator': gene([600, 450, 0]),
+    'color': advanced_color_generator(r_gen=gene(230), a_gen=gene(128), change_after=1),
+#    'color': gene((255, 255, 255, 255)),
+    'zoom': gene(1),
+    'alpha_angle': gene(0),
+    'spacing_x': gene(30),
+    'spacing_y': gene(30),
+    'translation': gene(Vector3(450, -600, 0)),
+#    'cam_center': gene(Vector3(600, 600, -100)),
+    'cam_center': camera_generator(Vector3(600, 600, -50), increment_vector=Vector3(0, -1, 0), min_y=300),
+    'cam_angle': gene(Vector3(math.pi/9, 0, 0)),
+    'cam_screen': gene(Vector3(0, 300, 200)),
+    'center3d': gene([600, 450, 0]),
 },
 )
 
@@ -180,34 +180,34 @@ grid2.rect.center = MIDDLE_MIDDLE
 clock = pygame.time.Clock()
 
 groove = shapes.SingleGroove(base_size=(300, 300), generators={
-    'amplitude_end_generator': sin_wave_angular_speed_generator(baseline=math.pi+0.01, mul=math.pi*0.99),
-    'color_generator': gene((128, 128, 128, 255)),
-    'alpha_angle_generator': infinite_grower(step=-0.01),
-    'stroke_width_generator': integerize(sin_wave_angular_speed_generator(baseline=2, mul=1, speed=5), 10),
+    'amplitude_end': sin_wave_angular_speed_generator(baseline=math.pi+0.01, mul=math.pi*0.99),
+    'color': gene((128, 128, 128, 255)),
+    'alpha_angle': infinite_grower(step=-0.01),
+    'stroke_width': integerize(sin_wave_angular_speed_generator(baseline=2, mul=1, speed=5), 10),
     }
 )
 groove.rect.center = MIDDLE_MIDDLE
 
 
 arwing = shapes.ObjSprite3D(file_path='assets/arwing.obj', base_size=None, generators={
-    'color_generator': advanced_color_generator(r_gen=gene(255), a_gen=gene(128), change_after=1),
-    'zoom_generator': gene(40), 
-    'alpha_angle_generator': gene(0),
-    'beta_angle_generator': infinite_grower(step=1),
-    'gamma_angle_generator': gene(180),
-    'translation_generator': NULL_V3_GEN,
-    'cam_center_generator': gene(Vector3(0, 200, -1000)), 
-    'cam_angle_generator': NULL_V3_GEN,
-    'cam_screen_generator': gene(Vector3(0, 0, 1000)), # shapes.camera_generator(Vector3(0, 0, 1), Vector3(0, 0, 50), max_z=2000), #gene(Vector3(0, 0, 200)),
-    'cam_aspect_ratio_generator': gene(0.75),
+    'color': advanced_color_generator(r_gen=gene(255), a_gen=gene(128), change_after=1),
+    'zoom': gene(40), 
+    'alpha_angle': gene(0),
+    'beta_angle': infinite_grower(step=1),
+    'gamma_angle': gene(180),
+    'translation': NULL_V3_GEN,
+    'cam_center': gene(Vector3(0, 200, -1000)), 
+    'cam_angle': NULL_V3_GEN,
+    'cam_screen': gene(Vector3(0, 0, 1000)), # shapes.camera_generator(Vector3(0, 0, 1), Vector3(0, 0, 50), max_z=2000), #gene(Vector3(0, 0, 200)),
+    'cam_aspect_ratio': gene(0.75),
 
     }
 )
 
 starfield = shapes.StarField(base_size=(8000, 900), generators={
-    'color_generator': default_color_generator(
+    'color': default_color_generator(
         (255, 255, 255, 80)),
-    'translation_generator': translation2d_generator(start_pos=Vector2(0, 0), increment_vector=Vector2(0.1, 0), max_vector=Vector2(7000, 0)),
+    'translation': translation2d_generator(start_pos=Vector2(0, 0), increment_vector=Vector2(0.1, 0), max_vector=Vector2(7000, 0)),
 })
 starfield.rect.center = MIDDLE_MIDDLE
 
