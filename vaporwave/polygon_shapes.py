@@ -55,10 +55,12 @@ class InfiniteTriangle(PolygonSprite):
     def prepare_basic_shape(self):
         act_w, act_h, maxlen_x, maxlen_y, center = self.get_geometry()
         polys = list()
+        ratio_h = 1
+        ratio_v = act_h / act_w
         for idx in range(0, self.num_triangles + 1):
             ratio = idx / self.num_triangles / 2
             a_x = self.base_w // 2 
-            a_y = ratio * self.base_h 
+            a_y = ratio * self.base_h
             b_x = ratio * self.base_w 
             b_y = self.base_h - (ratio * self.base_h) 
             c_x = self.base_w - (ratio * self.base_w) 
@@ -112,7 +114,9 @@ class ObjSprite3D(PolygonSprite):
         self._file_path_dirty = True
         self._file_path = value
 
-    def __init__(self, file_path, base_size=None, generators=None):
+    def __init__(self, file_path=None, base_size=None, generators=None):
+        if file_path is None:
+            file_path = generators.pop('file_path')
         self.file_path = file_path
         self._center3d = None
         super(ObjSprite3D, self).__init__(base_size, generators)

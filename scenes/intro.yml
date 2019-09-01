@@ -3,9 +3,23 @@ global:
     height: 720
     title: "A    d e m o      s c e n e | {scene_title}"
     framerate: 25
-    background_color: (0, 0, 0, 255)
+    background_color: utils.default_generator((0, 128, 0, 255))
 
 objects:
+  arwing:
+      type: ObjSprite3D
+      base_size: [400, 300]
+      generators:
+        file_path: "'assets/arwing.obj'"
+        color: utils.default_generator((255, 255, 255, 255))
+        zoom: utils.default_generator(40)
+        gamma_angle: utils.default_generator(180)
+        beta_angle: utils.infinite_grower(step=3)
+        translation: utils.default_generator(Vector3(0, 0, 0))
+        cam_center: utils.default_generator(Vector3(0, 200, -1000))
+        cam_angle: utils.default_generator(Vector3(0, 0, 0))
+        cam_screen: utils.default_generator(Vector3(0, 0, 1000))
+        cam_aspect_ratio: utils.default_generator(0.75)
   stars_1:
       type: StarField
       base_size:  [8000, 768]
@@ -26,12 +40,22 @@ objects:
       type: InfiniteTriangle
       base_size: [400, 300]
       generators:
-          min_w: 1
+          min_w: 100
           num_triangles: 5
           stroke_width: utils.default_generator(2)
           color: utils.default_generator((255, 255, 255, 120))
-          alpha_angle: utils.iterable_stutterer(utils.infinite_grower(step=-5), stutter=5)
+          alpha_angle: utils.iterable_stutterer(utils.infinite_grower(step=-5), stutter=3)
           zoom: utils.iterable_stutterer(utils.series_generator(series=[0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.2, 1.4, 2.0, 2.0, 2.0, 8], lastItem=8), stutter=5)
+  triangles_2:
+      type: InfiniteTriangle
+      base_size: [400, 300]
+      generators:
+          min_w: 1
+          num_triangles: 5
+          stroke_width: utils.default_generator(2)
+          zoom: utils.default_generator(1)
+          color: utils.default_generator((255, 255, 0, 255))
+          alpha_angle: utils.default_generator(0)
   som_text:
       type: TextSprite
       base_size: [800, 300]
@@ -52,6 +76,11 @@ effects:
 
 
 scenes:
+    - title: Start scene
+      objects:
+        - arwing
+      effects: []
+      comment: An empty scene
     - title: Intro scene
       comment: This is the intro scene. It is inspired by https://www.youtube.com/watch?v=pIub2PQ6hvY
       duration: 500
@@ -59,6 +88,7 @@ scenes:
           - stars_1
           - stars_2
       music: assets/switched-on-snes.flac
+      background_color: utils.basic_color_generator(Color(0, 0, 0, 255), Color(0, 0, 1, 255), max_components=Color(0, 0, 30, 255), reset=False)
     - title: Intro 2
       comment: Follow-up
       duration: 500
@@ -70,9 +100,10 @@ scenes:
       effects:
           - stars_1_wavelet
       music: assets/switched-on-snes.flac
+      background_color: utils.default_generator((0, 0, 30, 255))
     - title: Tri only
       comment: Triangle only
       duration: 500
       objects:
-          - triangles_1
-      music: assets/switched-on-snes.flac
+          - triangles_2
+      background_color: utils.default_generator((0, 0, 30, 255))

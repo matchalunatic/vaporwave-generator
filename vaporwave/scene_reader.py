@@ -24,7 +24,7 @@ from pygame.math import Vector2, Vector3
 
 logger = logging.getLogger(__name__)
 
-Scene = namedtuple("Scene", 'title duration objects effects music')
+Scene = namedtuple("Scene", 'title duration objects effects music background_color')
 
 class SceneReader(object):
     def __init__(self, scene_path):
@@ -46,7 +46,9 @@ class SceneReader(object):
         title = global_d.get('title', 'default title')
         music = global_d.get('background_music', None)
         framerate = global_d.get('framerate', os.environ.get('FR', 25))
-        self.background_color = eval(str(data.get('background_color', '(0, 0, 0, 255)')), globals(), locals())
+        self.background_color_generator = eval(str(global_d.get('background_color', 'utils.default_generator((0, 0, 0, 255))')), globals(), locals())
+        self.default_background_color_generator = self.background_color_generator
+        self.background_color = next(self.background_color_generator)
         self.width = width
         self.height = height
         self.title = title
@@ -94,7 +96,8 @@ class SceneReader(object):
             scene_efflist = scene.get('effects', [])
             scene_objs = tuple([self.objects[a] for a in scene_objlist])
             scene_effects = tuple([self.effects[a] for a in scene_efflist])
-            self.scenes.append(Scene(title=title, duration=duration, objects=scene_objs, effects=scene_effects, music=music))
+            background_color = eval(str(scene.get('background_color', 'None')), globals(), locals())
+            self.scenes.append(Scene(title=title, duration=duration, objects=scene_objs, effects=scene_effects, music=music, background_color=background_color))
 
 
     def parse_generators(self, generators):
@@ -113,6 +116,10 @@ class SceneReader(object):
             self.scene_counter += 1
             self.scene_title = cursc.title
             self.background_music = cursc.music
+            if cursc.background_color is None:
+                self.background_color_generator = self.default_background_color_generator
+            else:
+                self.background_color_generator = cursc.background_color
             self.update_title()
             self.update_music()
             return self.scene_counter
@@ -132,7 +139,12 @@ class SceneReader(object):
     def update_music(self):
         if self.background_music == self._playing_music:
             return
+        if self.background_music is None:
+            pygame.mixer.music.stop()
+            self._playing_music = None
+            return
         pygame.mixer.music.set_volume(0.2)
+        
         pygame.mixer.music.load(self.background_music)
         pygame.mixer.music.play()
         self._playing_music = self.background_music
@@ -146,9 +158,10 @@ class SceneReader(object):
         background = pygame.Surface(self.screen.get_size())
         background = background.convert_alpha()
 
-        background.fill(self.background_color)
         draw_over = False
         while self.going:
+            self.background_color = next(self.background_color_generator)
+            background.fill(self.background_color)
             self.clock.tick(self.framerate)
             for event in pygame.event.get():
                 if event.type == QUIT:

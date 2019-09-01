@@ -17,6 +17,7 @@ class DummyRect(object):
 # stolen on https://stackoverflow.com/questions/10823877/what-is-the-fastest-way-to-flatten-arbitrarily-nested-lists-in-python
 # thanks Noctys Skytower
 
+
 def flatten(iterable):
     iterator, sentinel, stack = iter(iterable), object(), []
     while True:
@@ -113,6 +114,33 @@ def tuple_minimal_total(minimum_value, a_tuple, intify=True, max_value=255):
         difference -= 1
     return tuple(int(o) for o in out)
 
+
+def basic_color_generator(starter_color=Color(0, 0, 0, 255), increment_color=Color(0, 0, 0, 255), operation="add", min_components=Color(0, 0, 0, 0), max_components=Color(255, 255, 255,255), reset=True):
+    """Generate basic RGBA colors with an incrementor"""
+    color = starter_color
+    needs_reset = False
+    needs_change = True
+    while True:
+        yield color
+        if needs_change and operation == "add":
+            color += increment_color
+        elif needs_change and operation == "sub":
+            color -= increment_color
+        elif needs_change and operation == "div":
+            color = color // increment_color
+        elif needs_change and operation == "mul":
+            color = color * increment_color
+        needs_reset = False
+        if any (color[a] > max_components[a] for a in range(3)):
+            needs_reset = True
+            needs_change = False
+        if any (color[a] < min_components[a] for a in range(3)):
+            needs_reset = True
+            needs_change = False
+        if reset and needs_reset:
+            color = starter_color
+            needs_change = True
+        
 
 def advanced_color_generator(change_after=None, r_gen=None, g_gen=None, b_gen=None, a_gen=None, booster=None):
     """Generates an infinite stream of RGBA colors"""
