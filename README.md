@@ -12,6 +12,10 @@ This is an homage to the super cool and chill videos made by Switched On SNES.
 
 This is a tribute to the world of analog synths.
 
+# Demo
+
+https://www.youtube.com/watch?v=Bq-zN7QZbig
+
 # Design
 
 All objects are driven by generators (functions that yield values).
