@@ -37,21 +37,28 @@ objects:
         translation: utils.translation2d_generator(start_pos=Vector2(0, 0), increment_vector=Vector2(1, 0), max_vector=Vector2(7000, 0))
         color: utils.default_generator((255, 255, 255, 80))
   triangles_1:
-      type: InfiniteTriangle
-      base_size: [400, 300]
+      type: InfiniteEquilateralTriangle
+      base_size: [400, 400]
       generators:
-          min_w: 100
-          num_triangles: 5
+          num_triangles: utils.default_generator(5)
           stroke_width: utils.default_generator(2)
           color: utils.default_generator((255, 255, 255, 120))
           alpha_angle: utils.iterable_stutterer(utils.infinite_grower(step=-5), stutter=3)
           zoom: utils.iterable_stutterer(utils.series_generator(series=[0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.2, 1.4, 2.0, 2.0, 2.0, 8], lastItem=8), stutter=5)
   triangles_2:
-      type: InfiniteTriangle
-      base_size: [400, 300]
+      type: InfiniteEquilateralTriangle
+      base_size: [400, 400]
       generators:
-          min_w: 1
-          num_triangles: 5
+          num_triangles: utils.default_generator(5)
+          stroke_width: utils.default_generator(2)
+          zoom: utils.default_generator(1)
+          color: utils.default_generator((255, 255, 0, 255))
+          alpha_angle: utils.default_generator(0)
+  triangles_3:
+      type: InfiniteEquilateralTriangle
+      base_size: [400, 347]
+      generators:
+          num_triangles: utils.iterable_stutterer(utils.infinite_grower(step=1), stutter=25)
           stroke_width: utils.default_generator(2)
           zoom: utils.default_generator(1)
           color: utils.default_generator((255, 255, 0, 255))
@@ -72,14 +79,26 @@ effects:
         type: WaveletGlitch
         target: stars_1
         generators: {}
+overall_effects:
+    overall_cvg:
+        type: ConvergenceGlitch
+        target: screen-overall
+        generators: {}
+    overall_wavelet:
+        type: WaveletGlitch
+        target: screen-overall
+        generators: {}
 
 
 
 scenes:
     - title: Start scene
       objects:
-        - arwing
-      effects: []
+          #- arwing
+        - triangles_3
+      effects: {}
+      overall_effects:
+          - overall_cvg
       comment: An empty scene
     - title: Intro scene
       comment: This is the intro scene. It is inspired by https://www.youtube.com/watch?v=pIub2PQ6hvY
@@ -87,7 +106,7 @@ scenes:
       objects:
           - stars_1
           - stars_2
-      music: assets/switched-on-snes.flac
+      music: assets/switched-on-snes.mp3
       background_color: utils.basic_color_generator(Color(0, 0, 0, 255), Color(0, 0, 1, 255), max_components=Color(0, 0, 30, 255), reset=False)
     - title: Intro 2
       comment: Follow-up
@@ -99,7 +118,7 @@ scenes:
           - som_text
       effects:
           - stars_1_wavelet
-      music: assets/switched-on-snes.flac
+      music: assets/switched-on-snes.mp3
       background_color: utils.default_generator((0, 0, 30, 255))
     - title: Tri only
       comment: Triangle only

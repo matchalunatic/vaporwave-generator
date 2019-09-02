@@ -60,3 +60,13 @@ class TextSprite(PipelinedSprite):
         self.image.convert_alpha()
         return super(TextSprite, self).draw_surface()
 
+
+
+class ScreenSurfaceWrapper(PipelinedSprite):
+    """Minimal wrapper for the Screen
+    
+       Goal: apply effects to the overall screen"""
+    def __init__(self, base_size=None, generators=None):
+        screen = generators.pop('screen')
+        self.image = screen
+

@@ -128,7 +128,6 @@ def transformation_projection_offset(object, points):
     out = []
     for point in points:
         out.append(point + offset)
-    # print(getminmax_xy(out))
     return out
 
 class PipelinedSprite(pygame.sprite.Sprite):
@@ -318,7 +317,6 @@ class GeometrySprite(PipelinedSprite):
             center3D = Vector3(scrw // 2, scrh // 2, 0)
             center3d_generator = default_number_generator(center3D)
         if cam_screen_generator is None:
-            print(base_size)
             cam_screen = Vector3(0, 0, max(base_size))
             cam_screen_generator = default_number_generator(cam_screen)
         if cam_center_generator is None:

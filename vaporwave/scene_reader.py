@@ -24,7 +24,7 @@ from pygame.math import Vector2, Vector3
 
 logger = logging.getLogger(__name__)
 
-Scene = namedtuple("Scene", 'title duration objects effects music background_color')
+Scene = namedtuple("Scene", 'title duration objects effects overall_effects music background_color')
 
 class SceneReader(object):
     def __init__(self, scene_path):
@@ -59,6 +59,7 @@ class SceneReader(object):
     def populate_scene(self):
         self.objects = {}
         self.effects = {}
+        self.overall_effects = {}
         self.scenes = []
         self.scene_counter = 0
         data = self.data
@@ -88,16 +89,38 @@ class SceneReader(object):
         
             obj = eval(evalstr, globals(), locals())
             self.effects[objname] = obj
+        fovreff = data.get('overall_effects', {})
+        for objname, objdata in fovreff.items():
+            o_type = objdata.get('type', None)
+            generators = objdata.get('generators', {})
+            target = self.screen_wrapper
+            if o_type not in dir(effects):
+                raise RuntimeError("I do not know effect " + o_type)
+            evalstr = "effects.{o_type}(other_sprite=target, generators=generators)".format(o_type=o_type)
+        
+            obj = eval(evalstr, globals(), locals())
+            self.overall_effects[objname] = obj
         for scene in data.get('scenes', []):
             title = scene.get('title', None)
             duration = scene.get('duration', 0)
             music = scene.get('music', None)
             scene_objlist = scene.get('objects', [])
             scene_efflist = scene.get('effects', [])
+            scene_ovreflist = scene.get('overall_effects', [])
             scene_objs = tuple([self.objects[a] for a in scene_objlist])
             scene_effects = tuple([self.effects[a] for a in scene_efflist])
+            scene_overall_effects = tuple([self.overall_effects[a] for a in scene_ovreflist])
             background_color = eval(str(scene.get('background_color', 'None')), globals(), locals())
-            self.scenes.append(Scene(title=title, duration=duration, objects=scene_objs, effects=scene_effects, music=music, background_color=background_color))
+            self.scenes.append(
+                    Scene(
+                        title=title, 
+                        duration=duration,
+                        objects=scene_objs,
+                        effects=scene_effects,
+                        overall_effects=scene_overall_effects,
+                        music=music,
+                        background_color=background_color)
+                    )
 
 
     def parse_generators(self, generators):
@@ -109,10 +132,15 @@ class SceneReader(object):
     def load_next_scene(self):
         if len(self.scenes) > self.scene_counter:
             self.current_stage.empty()
+            self.overall_effects_stage.empty()
             cursc = self.scenes[self.scene_counter]
             logger.info("next scene: %s", cursc.title)
-            self.current_stage.add(*cursc.objects)
-            self.current_stage.add(*cursc.effects)
+            if len(cursc.objects) > 0:
+                self.current_stage.add(*cursc.objects)
+            if len(cursc.effects) > 0:
+                self.current_stage.add(*cursc.effects)
+            if len(cursc.overall_effects) > 0:
+                self.overall_effects_stage.add(*cursc.overall_effects)
             self.scene_counter += 1
             self.scene_title = cursc.title
             self.background_music = cursc.music
@@ -132,7 +160,9 @@ class SceneReader(object):
         screen_size = (self.width, self.height)
         self.screen = pygame.display.set_mode(screen_size, 0, 32)
         self.current_stage = pygame.sprite.RenderUpdates([])
+        self.overall_effects_stage = pygame.sprite.RenderUpdates([])
         self.clock = pygame.time.Clock()
+        self.screen_wrapper = shapes.ScreenSurfaceWrapper(generators={'screen': self.screen})
         pygame.mixer.init()
 
 
@@ -178,10 +208,12 @@ class SceneReader(object):
                     self.framerate = 25
                 elif event.type == KEYDOWN and event.key == K_t:
                     self.framerate = 250
-            self.current_stage.update()
             if not draw_over:
                 self.screen.blit(background, (0, 0))
+            self.current_stage.update()
             self.current_stage.draw(self.screen)
+            self.overall_effects_stage.update()
+            self.overall_effects_stage.draw(self.screen)
             pygame.display.update()
         pygame.quit()
 

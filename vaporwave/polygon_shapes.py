@@ -96,7 +96,43 @@ class InfiniteTriangle3D(InfiniteTriangle):
         ]
 
 
+        
 
+
+class InfiniteEquilateralTriangle(PolygonSprite):
+    def __init__(self, base_size=None, generators=None):
+        if not generators:
+            generators = {}
+        num_triangles = generators.pop('num_triangles', default_generator(10))
+        self.num_triangles_generator = num_triangles
+        super(InfiniteEquilateralTriangle, self).__init__(base_size, generators)
+
+    def prepare_basic_shape(self):
+        act_w, act_h, maxlen_x, maxlen_y, center = self.get_geometry()
+        polys = list()
+        ratio_h = 1
+        ratio_v = act_h / act_w
+        nt = self.num_triangles
+        w, h = self.base_size
+        ideal_height = w * 0.5 * math.sqrt(3)
+        geocenter = Vector2(w / 2.0, h / 2.0)
+        o_a_unit = Vector2(0, -1)
+        for idx in range(0, nt):
+            ratio = ideal_height * idx / nt
+            o_a = (o_a_unit * ratio)
+            o_b = o_a.rotate(120)
+            o_c = o_a.rotate(240)
+            polys.append([
+                o_a + geocenter,
+                o_b + geocenter,
+                o_c + geocenter,
+                ])
+        self.points = polys
+
+            
+    def update(self):
+        self.num_triangles = next(self.num_triangles_generator)
+        super(InfiniteEquilateralTriangle, self).update()
 
 
 class ObjSprite3D(PolygonSprite):

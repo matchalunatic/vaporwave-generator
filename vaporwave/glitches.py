@@ -95,6 +95,7 @@ class RGBPhaseGlitch(Glitch):
         super(RGBPhaseGlitch, self).update()
 
     def glitch(self):
+        self.image = self.image.convert_alpha()
         par = pygame.surfarray.pixels_red(self.image).astype('uint32')
         par = numpy.roll(par, self.r_offset_x, 0)
         par = numpy.roll(par, self.r_offset_y, 1)
