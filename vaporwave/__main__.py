@@ -23,7 +23,7 @@ if the_args[0].upper() == 'SCENE':
     sys.exit(0)
 
 
-sinw = lambda: sin_wave_angular_speed_generator(mul=60, speed=1, baseline=0.5)
+sinw = lambda: sin_wave_generator(mul=60, speed=1, baseline=0.5)
 
 halfer = lambda x: list(a/2 for a in x)
 
@@ -137,7 +137,7 @@ grid = shapes.Grid(base_size=GRID_SIZE, generators={
     'color': advanced_color_generator(r_gen=gene(255), a_gen=gene(60), change_after=10),
     'zoom': default_zoom_generator(zoom_cycle=[1, 0.5, 1.5, 2, 3, 0.1, ], periods=[FRAME_RATE]), 
     # 'zoom': gene(1),
-    'spacing_x': sin_wave_angular_speed_generator(baseline=15, mul=1),
+    'spacing_x': sin_wave_generator(baseline=15, mul=1),
     'spacing_y': cos_wave_angular_speed_generator(baseline=15, mul=1),
     'translation': gene(UNITX_V2*0 + UNITY_V2*0),
 },
@@ -180,10 +180,10 @@ grid2.rect.center = MIDDLE_MIDDLE
 clock = pygame.time.Clock()
 
 groove = shapes.SingleGroove(base_size=(300, 300), generators={
-    'amplitude_end': sin_wave_angular_speed_generator(baseline=math.pi+0.01, mul=math.pi*0.99),
+    'amplitude_end': sin_wave_generator(baseline=math.pi+0.01, mul=math.pi*0.99),
     'color': gene((128, 128, 128, 255)),
     'alpha_angle': infinite_grower(step=-0.01),
-    'stroke_width': integerize(sin_wave_angular_speed_generator(baseline=2, mul=1, speed=5), 10),
+    'stroke_width': integerize(sin_wave_generator(baseline=2, mul=1, speed=5), 10),
     }
 )
 groove.rect.center = MIDDLE_MIDDLE
@@ -226,12 +226,12 @@ elems = list(names[a] for a in the_args if a in names)
 
 
 phase_glitch = glitches.RGBPhaseGlitch(elems[-1], generators={
-    'r_offset_x': integerize(sin_wave_angular_speed_generator(mul=60, baseline=61, speed=1)),
-    'g_offset_x': integerize(sin_wave_angular_speed_generator(mul=120, baseline=11, speed=0.1)),
-    'b_offset_x': integerize(sin_wave_angular_speed_generator(mul=60, baseline=31, speed=0.3)),
-    'r_offset_y': integerize(sin_wave_angular_speed_generator(mul=200, baseline=-250, speed=0.5)),
-    'g_offset_y': integerize(sin_wave_angular_speed_generator(mul=300, baseline=-150, speed=1)),
-    'b_offset_y': integerize(sin_wave_angular_speed_generator(mul=100, baseline=-80, speed=0.2)),
+    'r_offset_x': integerize(sin_wave_generator(mul=60, baseline=61, speed=1)),
+    'g_offset_x': integerize(sin_wave_generator(mul=120, baseline=11, speed=0.1)),
+    'b_offset_x': integerize(sin_wave_generator(mul=60, baseline=31, speed=0.3)),
+    'r_offset_y': integerize(sin_wave_generator(mul=200, baseline=-250, speed=0.5)),
+    'g_offset_y': integerize(sin_wave_generator(mul=300, baseline=-150, speed=1)),
+    'b_offset_y': integerize(sin_wave_generator(mul=100, baseline=-80, speed=0.2)),
     'alpha': gene(200), 
     
     })

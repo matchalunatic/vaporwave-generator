@@ -15,6 +15,68 @@ class LineSprite(GeometrySprite):
 
 
 
+
+class Rain(LineSprite):
+    """Dots rain
+    """
+    def __init__(self, base_size=None, generators=None):
+        if generators is None:
+            generators = {}
+
+        v_line_count = generators.pop('v_line_count', default_generator(25))
+        v_spacing = generators.pop('v_spacing', default_generator(20))
+        v_drops_count = generators.pop('v_drops_count', default_generator(13))
+        v_distance_ratio = generators.pop('v_distance_ratio', default_generator(1))
+
+        self.v_line_count_generator = v_line_count
+        self.v_spacing_generator = v_spacing
+        self.v_distance_ratio_generator = v_distance_ratio
+        self.v_drops_count_generator = v_drops_count
+
+        super(Rain, self).__init__(base_size, generators)
+
+    def update(self):
+        self.v_line_count = next(self.v_line_count_generator)
+        self.v_spacing = next(self.v_spacing_generator)
+        self.v_distance_ratio = next(self.v_distance_ratio_generator)
+        self.v_drops_count = next(self.v_drops_count_generator)
+        return super(Rain, self).update()
+
+    def make_drop(self, x, y):
+        """
+            O
+           OXO
+            O
+        """
+        return [
+                (
+                 Vector2(x-1, y),
+                 Vector2(x+1, y),
+                ),
+                (
+                 Vector2(x, y-1),
+                 Vector2(x, y+1),
+                )
+               ]
+
+    def prepare_basic_shape(self):
+        """Each rain drop is a starlet
+           x
+          xxx
+           x
+        """
+        w, h = self.base_size
+        
+        offset = w / self.v_line_count
+        self.points = []
+        for col in range(self.v_line_count):
+            x = col * offset
+            for drop_i in range(self.v_drops_count):
+                y_base = drop_i * self.v_spacing
+                y = y_base ** self.v_distance_ratio 
+                self.points.append(self.make_drop(x, y))
+            
+
 class Grid(LineSprite):
     """2D grid"""
 
@@ -119,3 +181,4 @@ class Grid3D(Grid):
             transformation_projection3d,
             transformation_projection_offset,
         ]
+

@@ -1,0 +1,107 @@
+global:
+    width: 1920
+    height: 1080
+    title: "Showcase | {scene_title}"
+    framerate: 60
+    background_color: utils.default_generator((30, 30, 30, 255))
+
+objects:
+  arwing:
+      type: ObjSprite3D
+      base_size: [400, 300]
+      generators:
+        file_path: "'assets/arwing.obj'"
+        color: utils.default_generator((255, 255, 255, 255))
+        zoom: utils.default_generator(40)
+        gamma_angle: utils.default_generator(180)
+        beta_angle: utils.infinite_grower(step=3)
+        translation: utils.default_generator(Vector3(0, 0, 0))
+        cam_center: utils.default_generator(Vector3(0, 200, -1000))
+        cam_angle: utils.default_generator(Vector3(0, 0, 0))
+        cam_screen: utils.default_generator(Vector3(0, 0, 1000))
+        cam_aspect_ratio: utils.default_generator(0.75)
+  starfield:
+      type: StarField
+      base_size:  [8000, 1080]
+      generators:
+        stars_count: 250
+        random_seed: 19051991
+        translation: utils.translation2d_generator(start_pos=Vector2(0, 0), increment_vector=Vector2(0.1, 0), max_vector=Vector2(7000, 0))
+        color: utils.default_generator((255, 255, 255, 80))
+  iet:
+      type: InfiniteEquilateralTriangle
+      base_size: [400, 400]
+      generators:
+          num_triangles: utils.default_generator(5)
+          stroke_width: utils.default_generator(2)
+          color: utils.default_generator((255, 255, 255, 120))
+          alpha_angle: utils.iterable_stutterer(utils.infinite_grower(step=-5), stutter=3)
+          zoom: utils.iterable_stutterer(utils.series_generator(series=[0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.2, 1.4, 2.0, 2.0, 2.0, 8], lastItem=8), stutter=5)
+  rain:
+      type: Rain
+      base_size: [400, 300]
+      generators:
+        v_distance_ratio: utils.sin_wave_generator(mul=0.1, baseline=1, speed=1)
+        color: utils.default_generator((200, 200, 250, 200))
+        zoom: utils.default_generator(4)
+  text:
+      type: TextSprite
+      base_size: [800, 300]
+      generators:
+          font: utils.default_generator(('freesansbold.ttf', 16))
+          zoom: utils.default_generator(4)
+          color: utils.default_generator((255, 255, 255, 200))
+          background: utils.default_generator(None)
+          text: utils.iterable_stutterer(utils.typewriter_iterator('a sample text', True), stutter=7)
+          rect: utils.default_generator(dict(center=(1920/2, 1080/2)))
+  grid:
+     type: Grid
+     base_size: [800, 600]
+     generators:
+         color: utils.basic_color_generator(Color(128, 128, 0, 255), Color(1, 1, 1, 255), max_components=Color(255, 255, 255, 255), reset=True)
+         stroke_width: utils.default_generator(1)
+  grid3d:
+     type: Grid3D
+     base_size: [800, 600]
+     generators:
+        color: utils.basic_color_generator(Color(128, 128, 0, 255), Color(1, 1, 1, 255), max_components=Color(255, 255, 255, 255), reset=True)
+        stroke_width: utils.default_generator(1)
+        gamma_angle: utils.default_generator(180)
+        beta_angle: utils.infinite_grower(step=3)
+        translation: utils.default_generator(Vector3(0, 0, 0))
+        cam_center: utils.default_generator(Vector3(0, 200, -1000))
+        cam_angle: utils.default_generator(Vector3(0, 0, 0))
+        cam_screen: utils.default_generator(Vector3(0, 0, 1000))
+        cam_aspect_ratio: utils.default_generator(0.75)
+  square:
+      type: Square
+      base_size: [800, 600]
+      color: utils.basic_color_generator(Color(128, 128, 0, 255), Color(1, 1, 1, 255), max_components=Color(255, 255, 255, 255), reset=True)
+      stroke_width: utils.default_generator(1)
+
+scenes:
+    - title: Arwing
+      objects:
+          - arwing
+    - title: starfield
+      objects:
+          - starfield 
+    - title: InfiniteEquilateralTriangle
+      objects:
+          - iet
+    - title: rain
+      objects:
+          - rain
+      background_color: utils.default_generator((240, 240, 240, 255))
+    - title: text
+      objects:
+          - text
+    - title: grid
+      objects:
+          - grid
+    - title: grid3d
+      objects:
+          - grid3d
+    - title: square
+      objects:
+          - square

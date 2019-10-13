@@ -149,13 +149,13 @@ def advanced_color_generator(change_after=None, r_gen=None, g_gen=None, b_gen=No
     elif change_after is None:
         change_after = default_number_generator(10)
     if r_gen is None:
-        r_gen = sin_wave_angular_speed_generator(
+        r_gen = sin_wave_generator(
             baseline=127, mul=127, offset=math.pi/3)
     if g_gen is None:
-        g_gen = sin_wave_angular_speed_generator(
+        g_gen = sin_wave_generator(
             baseline=127, mul=127, offset=2*math.pi/3)
     if b_gen is None:
-        b_gen = sin_wave_angular_speed_generator(
+        b_gen = sin_wave_generator(
             baseline=127, mul=127, offset=math.pi)
     if a_gen is None:
         a_gen = default_number_generator(255)
@@ -187,12 +187,13 @@ def default_width_generator(width=2):
         yield width
 
 
-def sin_wave_angular_speed_generator(mul=1, speed=1, baseline=0, offset=0):
+def sin_wave_generator(mul=1, speed=1, baseline=0, offset=0):
     """Offset in rad"""
     i = 0
     while True:
         i += 1
         yield baseline + mul*math.sin(speed * i * math.pi / 180 + offset)
+
 
 
 def cos_wave_angular_speed_generator(mul=1, speed=1, baseline=0, offset=0):

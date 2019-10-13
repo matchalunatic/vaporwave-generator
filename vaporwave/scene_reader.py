@@ -208,6 +208,11 @@ class SceneReader(object):
                     self.framerate = 25
                 elif event.type == KEYDOWN and event.key == K_t:
                     self.framerate = 250
+                elif event.type == KEYDOWN and event.key == K_o:
+                    self.framerate -= 1
+                elif event.type == KEYDOWN and event.key == K_p:
+                    self.framerate += 1
+
             if not draw_over:
                 self.screen.blit(background, (0, 0))
             self.current_stage.update()

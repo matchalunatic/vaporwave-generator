@@ -32,7 +32,7 @@ effect only makes sense with these values.
 # Plans
 
 Support a better Scene syntax (will always be yaml or toml unless this gets bad)
-Support MIDI input for scene tweaking and playing with components parameters
+Support ~~MIDI~~ PureData OSC input for scene tweaking and playing with components parameters
 Add more shapes
 Add more effects and glitches
 Allow the scene components to be driven by sound
