@@ -120,7 +120,7 @@ scenes:
       objects:
           - stars_1
           - stars_2
-      music: assets/switched-on-snes.mp3
+      music: assets/switched-on-snes.ogg
       background_color: utils.basic_color_generator(Color(0, 0, 0, 255), Color(0, 0, 1, 255), max_components=Color(0, 0, 30, 255), reset=False)
     - title: Intro 2
       comment: Follow-up
@@ -133,7 +133,7 @@ scenes:
           - rain
       effects:
           - stars_1_wavelet
-      music: assets/switched-on-snes.mp3
+      music: assets/switched-on-snes.ogg
       background_color: utils.default_generator((0, 0, 30, 255))
     - title: Tri only
       comment: Triangle only
