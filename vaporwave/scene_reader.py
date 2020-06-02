@@ -2,6 +2,7 @@
 
 Cool for non-interactive scenes
 """
+from datetime import datetime
 
 import os
 import logging
@@ -27,8 +28,9 @@ logger = logging.getLogger(__name__)
 Scene = namedtuple("Scene", 'title duration objects effects overall_effects music background_color')
 
 class SceneReader(object):
-    def __init__(self, scene_path):
+    def __init__(self, scene_path, display_options=0):
         self._playing_music = None
+        self.display_options = display_options
         self.scene_path = scene_path
         self.parse_scene()
         self.init_pygame()
@@ -86,7 +88,6 @@ class SceneReader(object):
             if o_type not in dir(effects):
                 raise RuntimeError("I do not know effect " + o_type)
             evalstr = "effects.{o_type}(other_sprite=target, generators=generators)".format(o_type=o_type)
-        
             obj = eval(evalstr, globals(), locals())
             self.effects[objname] = obj
         fovreff = data.get('overall_effects', {})
@@ -158,7 +159,7 @@ class SceneReader(object):
     def init_pygame(self):
         pygame.init()
         screen_size = (self.width, self.height)
-        self.screen = pygame.display.set_mode(screen_size, 0, 32)
+        self.screen = pygame.display.set_mode(screen_size, self.display_options, 32)
         self.current_stage = pygame.sprite.RenderUpdates([])
         self.overall_effects_stage = pygame.sprite.RenderUpdates([])
         self.clock = pygame.time.Clock()
@@ -189,7 +190,9 @@ class SceneReader(object):
         background = background.convert_alpha()
 
         draw_over = False
+        latch_log = False
         while self.going:
+            
             self.background_color = next(self.background_color_generator)
             background.fill(self.background_color)
             self.clock.tick(self.framerate)
@@ -212,7 +215,8 @@ class SceneReader(object):
                     self.framerate -= 1
                 elif event.type == KEYDOWN and event.key == K_p:
                     self.framerate += 1
-
+                elif event.type == KEYDOWN and event.key == K_i:
+                    latch_log = True
             if not draw_over:
                 self.screen.blit(background, (0, 0))
             self.current_stage.update()
@@ -220,5 +224,8 @@ class SceneReader(object):
             self.overall_effects_stage.update()
             self.overall_effects_stage.draw(self.screen)
             pygame.display.update()
+            if latch_log:
+                logger.info("render time: %d", self.clock.get_fps())
+                latch_log = False
         pygame.quit()
 

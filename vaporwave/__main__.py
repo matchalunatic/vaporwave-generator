@@ -11,7 +11,10 @@ import math
 import os
 
 
+
 FRAME_RATE=int(os.environ.get("FR", 25))
+WINDOW_MODE = pygame.FULLSCREEN | pygame.HWSURFACE | pygame.SCALED
+
 logging.basicConfig(level=logging.DEBUG)
 
 the_args = sys.argv[1:]
@@ -19,9 +22,13 @@ the_args = sys.argv[1:]
 if the_args[0].upper() == 'SCENE':
     print("scene mode")
     scene_f = the_args[1]
-    sr = scene_reader.SceneReader(scene_f)
+    sr = scene_reader.SceneReader(scene_f, WINDOW_MODE)
     sys.exit(0)
 
+
+
+# this is dead code
+assert 1==0
 
 sinw = lambda: sin_wave_generator(mul=60, speed=1, baseline=0.5)
 
@@ -65,7 +72,7 @@ UNITY_V2 = Vector2(0, 1)
 
 
 pygame.init()
-screen = pygame.display.set_mode(SCREEN_SIZE, 0, 32)
+screen = pygame.display.set_mode(SCREEN_SIZE, pygame.FULLSCREEN | pygame.SCALED | pygame.HWSURFACE, 32)
 pygame.display.set_caption('w u t     i s                   t h i s')
 pygame.mouse.set_visible(0)
 

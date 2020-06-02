@@ -130,7 +130,6 @@ scenes:
           - stars_2
           - triangles_1
           - som_text
-          - rain
       effects:
           - stars_1_wavelet
       music: assets/switched-on-snes.ogg
